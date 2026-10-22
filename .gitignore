@@ -1,0 +1,15 @@
+# Local build settings
+MusicBee.local.targets
+
+# Build output and compiled binaries
+[Bb]in/
+[Oo]bj/
+*.dll
+*.exe
+*.pdb
+
+# Visual Studio user-specific files
+.vs/
+*.user
+*.suo
+*.cache
