@@ -1,0 +1,65 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Debug",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "msbuild",
+        "modern_lyrics.csproj",
+        "/t:Build",
+        "/p:Configuration=Debug",
+        "/p:CopyPluginToMusicBee=false",
+        "/v:minimal"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Build Release",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "msbuild",
+        "modern_lyrics.csproj",
+        "/t:Build",
+        "/p:Configuration=Release",
+        "/p:CopyPluginToMusicBee=false",
+        "/v:minimal"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "Build and copy to MusicBee",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "msbuild",
+        "modern_lyrics.csproj",
+        "/t:Build",
+        "/p:Configuration=Debug",
+        "/v:minimal"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    },
+    {
+      "label": "Clean",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "msbuild",
+        "modern_lyrics.csproj",
+        "/t:Clean",
+        "/v:minimal"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    }
+  ]
+}
