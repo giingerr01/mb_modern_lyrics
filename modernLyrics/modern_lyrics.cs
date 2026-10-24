@@ -1,10 +1,9 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Channels;
-using System.Diagnostics;
+using MusicBeePlugin.Models;
+using MusicBeePlugin.UI;
 
 namespace MusicBeePlugin
 {
@@ -12,6 +11,7 @@ namespace MusicBeePlugin
     {
         private MusicBeeApiInterface mbApiInterface;
         private PluginInfo about = new PluginInfo();
+        private LyricsWindow lyricsWindow;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
@@ -22,7 +22,7 @@ namespace MusicBeePlugin
             about.Description = "A modern lyrics parser plugin for MusicBee";  // description of the plugin
             about.Author = "giingerr01";
             about.TargetApplication = "";   //  the name of a Plugin Storage device or panel header for a dockable panel
-            about.Type = PluginType.General;
+            about.Type = PluginType.PanelView;
             about.VersionMajor = 1;  // your plugin version
             about.VersionMinor = 0;
             about.Revision = 1;
@@ -80,18 +80,14 @@ namespace MusicBeePlugin
             switch (type)
             {
                 case NotificationType.PluginStartup:
-                    // perform startup initialisation
-                    switch (mbApiInterface.Player_GetPlayState())
-                    {
-                        case PlayState.Playing:
-                        case PlayState.Paused:
-                            // ...
-                            break;
-                    }
+                    LoadCurrentLyrics();
                     break;
                 case NotificationType.TrackChanged:
-                    string artist = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
-                    // ...
+                case NotificationType.NowPlayingLyricsReady:
+                    LoadCurrentLyrics();
+                    break;
+                case NotificationType.PlayStateChanged:
+                    UpdatePlaybackPosition();
                     break;
             }
         }
@@ -108,9 +104,15 @@ namespace MusicBeePlugin
             {
                 dpiScaling = g.DpiY / 96f;
             }
-            panel.Paint += panel_Paint;
-            //mbApiInterface.MB_SetPanelScrollableArea(panel, new Size(0, 200 * dpiScaling), false);
-            return Convert.ToInt32(100 * dpiScaling);
+            lyricsWindow = new LyricsWindow();
+            lyricsWindow.Dock = DockStyle.Fill;
+            lyricsWindow.SetPlaybackPositionProvider(delegate
+            {
+                return TimeSpan.FromMilliseconds(Math.Max(0, mbApiInterface.Player_GetPosition()));
+            });
+            panel.Controls.Add(lyricsWindow);
+            LoadCurrentLyrics();
+            return -1;
         }
 
         //  presence of this function indicates to MusicBee that the dockable panel created above will show menu items when the panel header is clicked
@@ -124,8 +126,32 @@ namespace MusicBeePlugin
 
         private void panel_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.Clear(Color.Red);
-            TextRenderer.DrawText(e.Graphics, "hello", SystemFonts.CaptionFont, new Point(10, 10), Color.Blue);
+        }
+
+        private void LoadCurrentLyrics()
+        {
+            if (lyricsWindow == null)
+            {
+                return;
+            }
+
+            string rawLyrics = mbApiInterface.NowPlaying_GetLyrics();
+            int durationSeconds = mbApiInterface.NowPlaying_GetDuration();
+            TimeSpan? duration = durationSeconds > 0
+                ? (TimeSpan?)TimeSpan.FromSeconds(durationSeconds)
+                : null;
+
+            lyricsWindow.SetLyrics(rawLyrics, duration);
+            UpdatePlaybackPosition();
+        }
+
+        private void UpdatePlaybackPosition()
+        {
+            if (lyricsWindow != null)
+            {
+                lyricsWindow.UpdatePlaybackPosition(
+                    TimeSpan.FromMilliseconds(Math.Max(0, mbApiInterface.Player_GetPosition())));
+            }
         }
     }
 }
