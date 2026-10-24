@@ -84,7 +84,7 @@
   <ItemGroup>
     <Compile Include="MusicBeeInterface.cs" />
     <Compile Include="modernLyrics\modern_lyrics.cs" />
-    <Compile Include="modernLyrics\Models\LyricsDocuments.cs" />
+    <Compile Include="modernLyrics\Models\LyricsDocument.cs" />
     <Compile Include="modernLyrics\Models\LyricsLine.cs" />
     <Compile Include="modernLyrics\Models\LyricWord.cs" />
     <Compile Include="modernLyrics\Parsing\EnhancedLyricsParser.cs" />
