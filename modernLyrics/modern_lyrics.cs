@@ -2,7 +2,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using MusicBeePlugin.Models;
 using MusicBeePlugin.UI;
 
 namespace MusicBeePlugin
@@ -99,11 +98,6 @@ namespace MusicBeePlugin
             //    < 0 indicates to MusicBee this control is resizable and should be sized to fill the panel it is docked to in MusicBee
             //    = 0 indicates to MusicBee this control resizeable
             //    > 0 indicates to MusicBee the fixed height for the control.Note it is recommended you scale the height for high DPI screens(create a graphics object and get the DpiY value)
-            float dpiScaling = 0;
-            using (Graphics g = panel.CreateGraphics())
-            {
-                dpiScaling = g.DpiY / 96f;
-            }
             lyricsWindow = new LyricsWindow();
             lyricsWindow.Dock = DockStyle.Fill;
             lyricsWindow.SetPlaybackPositionProvider(delegate
@@ -119,13 +113,7 @@ namespace MusicBeePlugin
         // return the list of ToolStripMenuItems that will be displayed
         public List<ToolStripItem> GetHeaderMenuItems()
         {
-            List<ToolStripItem> list = new List<ToolStripItem>();
-            list.Add(new ToolStripMenuItem("A menu item"));
-            return list;
-        }
-
-        private void panel_Paint(object sender, PaintEventArgs e)
-        {
+            return new List<ToolStripItem>();
         }
 
         private void LoadCurrentLyrics()
