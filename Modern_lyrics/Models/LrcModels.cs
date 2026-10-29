@@ -1,5 +1,5 @@
 using System;
-using system.Collections.Generic;
+using System.Collections.Generic;
 
 namespace MusicBeePlugin
 {
