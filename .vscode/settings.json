@@ -4,5 +4,6 @@
     "[csharp]": {
         "editor.defaultFormatter": "ms-dotnettools.csharp",
         "editor.formatOnSave": true
-    }
+    },
+    "dotnet.preferCSharpExtension": true
 }
