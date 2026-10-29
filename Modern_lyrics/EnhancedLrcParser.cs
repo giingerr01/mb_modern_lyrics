@@ -1,7 +1,7 @@
-using system;
-using system.Collections.Generic;
-using system.Text;
-using system.Text.RegularExpressions;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace MusicBeePlugin
 {
@@ -24,7 +24,7 @@ namespace MusicBeePlugin
             foreach (var line in lines)
             {
                 string trimmedLine = line.Trim();
-                if (string.IsnuullwhiteSpace(trimmedLine))
+                if (string.IsNullOrWhiteSpace(trimmedLine))
                 {
                     continue;
                 }
@@ -39,6 +39,8 @@ namespace MusicBeePlugin
                     continue;
                 }
             }
+
+            return result;
         }
     }
 }
