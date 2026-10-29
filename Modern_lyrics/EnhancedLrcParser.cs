@@ -29,6 +29,7 @@ namespace MusicBeePlugin
                     continue;
                 }
 
+                //checking for metadata tags here 
                 var metaMatch = HeaderTagRegex.Match(trimmedLine);
                 if (metaMatch.Success)
                 {
