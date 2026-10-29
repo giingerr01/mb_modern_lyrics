@@ -65,7 +65,30 @@ namespace MusicBeePlugin
                         TimeSpan wordStart = ParseTimestamp(wm.Groups["min"].Value,
                         wm.Groups["sec"].Value)
                         + result.Offset;
+                        string text = wm.Groups["text"].Value;
+
+                        lyricLine.Words.Add(new LyricWord
+                        {
+                            StartTime = wordStart,
+                            Text = text
+                        });
                     }
+
+                    for (int i = 0; i < lyricLine.Words.Count - 1; i++)
+                    {
+                        lyricLine.Words[i].EndTime = lyricLine.Words[i + 1].StartTime;
+                    }
+                    lyricLine.FullText = string.Concat(lyricLine.Words.ConvertAll(w => w.Text));
+                }
+                else
+                {
+                    lyricLine.FullText = lineContent;
+                    lyricLine.Words.Add(new LyricWord
+                    {
+                        StartTime = lyricLine.StartTime,
+                        Text = lineContent
+                    });
+
                 }
             }
 
@@ -78,6 +101,13 @@ namespace MusicBeePlugin
             int minutes = int.Parse(parts[0], CultureInfo.InvariantCulture);
             double seconds = double.Parse(parts[1], CultureInfo.InvariantCulture);
             return TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
+        }
+
+        private static TimeSpan ParseTimestamp(string minutes, string seconds)
+        {
+            int parsedMinutes = int.Parse(minutes, CultureInfo.InvariantCulture);
+            double parsedSeconds = double.Parse(seconds, CultureInfo.InvariantCulture);
+            return TimeSpan.FromMinutes(parsedMinutes) + TimeSpan.FromSeconds(parsedSeconds);
         }
 
     }
