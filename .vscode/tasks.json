@@ -1,0 +1,22 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build MB Modern Lyrics",
+            "type": "process",
+            "command": "dotnet",
+            "args": [
+                "msbuild",
+                "${workspaceFolder}\\MB_Modern_lyrics.csproj",
+                "/t:Build",
+                "/p:Configuration=Debug",
+                "/verbosity:minimal"
+            ],
+            "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
