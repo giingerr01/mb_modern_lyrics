@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -36,11 +37,48 @@ namespace MusicBeePlugin
                     string key = metaMatch.Groups["key"].Value.ToLowerInvariant();
                     string value = metaMatch.Groups["value"].Value;
                     result.Metadata[key] = value;
+
+                    if (key == "offset" && double.TryParse(value, out double offset))
+                    {
+                        result.Offset = TimeSpan.FromMilliseconds(offset);
+                    }
                     continue;
+                }
+                var lineMatch = LineTimestampRegex.Match(trimmedLine);
+                if (!lineMatch.Success)
+                {
+                    continue;
+                }
+
+                TimeSpan lineStart = ParseTimestamp(lineMatch.Groups["timestamp"].Value);
+                string lineContent = trimmedLine.Substring(lineMatch.Length); // +2 for the brackets
+                var lyricLine = new LyricLine
+                {
+                    StartTime = lineStart + result.Offset
+                };
+
+                var wordMatches = WordTimestampRegex.Matches(lineContent);
+                if (wordMatches.Count > 0)
+                {
+                    foreach (Match wm in wordMatches)
+                    {
+                        TimeSpan wordStart = ParseTimestamp(wm.Groups["min"].Value,
+                        wm.Groups["sec"].Value)
+                        + result.Offset;
+                    }
                 }
             }
 
             return result;
         }
+
+        private static TimeSpan ParseTimestamp(string timestamp)
+        {
+            string[] parts = timestamp.Split(':');
+            int minutes = int.Parse(parts[0], CultureInfo.InvariantCulture);
+            double seconds = double.Parse(parts[1], CultureInfo.InvariantCulture);
+            return TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
+        }
+
     }
 }
