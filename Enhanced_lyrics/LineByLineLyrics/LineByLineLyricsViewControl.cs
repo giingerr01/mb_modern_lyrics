@@ -14,7 +14,7 @@ namespace MusicBeePlugin
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
 
-        // layout (in "content" pixels, top of first line = 0)
+        // layout
         private float[] _tops = new float[0];
         private float[] _heights = new float[0];
         private float _totalHeight;
@@ -28,7 +28,7 @@ namespace MusicBeePlugin
         private readonly Font _activeFont = new Font("Segoe UI", 16F, FontStyle.Bold);
         private readonly Font _inactiveFont = new Font("Segoe UI", 16F, FontStyle.Regular);
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.White);
-        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.Gray);
+        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.Blue);
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -160,7 +160,7 @@ namespace MusicBeePlugin
             return Math.Max(0, Math.Min(MaxScroll(), value));
         }
 
-        // synced: keep the active line vertically centered; unsynced: keep the current (clamped) target
+        // synced: keeping the active line ahh...vericallly in center and unsynced lyrics keep the current clapmped target
         private float ComputeTarget()
         {
             if (!_lyrics.IsSynchronized || _tops.Length == 0)

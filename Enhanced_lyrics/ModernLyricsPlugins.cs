@@ -54,6 +54,22 @@ namespace MusicBeePlugin
             return false;
         }
 
+        private void ApplySkinColors()
+        {
+            if (_lyricsViewControl != null && !_lyricsViewControl.IsDisposed)
+            {
+                return;
+            }
+            Color bgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentBackground));
+            Color fgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentForeground));
+            // Color highlightColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateModified, ElementComponent.ComponentForeground));
+
+            _lyricsViewControl.BackColor = bgColor;
+            _lyricsViewControl.ForeColor = fgColor;
+            // _lyricsViewControl.highlightColor = highlightColor;
+            _lyricsViewControl.Invalidate();
+        }
+
         public void SaveSettings()
         {
         }
@@ -99,6 +115,7 @@ namespace MusicBeePlugin
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
             _lyricsViewControl.SetLyrics(_currentLyrics);
             panel.Controls.Add(_lyricsViewControl);
+            ApplySkinColors();
 
             //makeing  sure that the lyrics are loaded even if plugin startup fired bfore panel creating
             if (_currentLyrics == null || _currentLyrics.Lines.Count == 0)
@@ -112,7 +129,7 @@ namespace MusicBeePlugin
 
             UpdateTimerState();
             SyncPosition();
-            return 600;   // < 0: resizable, fills the space the panel is docked to
+            return 0;   // < 0: resizable, fills the space the panel is docked to
         }
 
         private void RunOnUiThreadYouMf(Action action)
