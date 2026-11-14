@@ -12,7 +12,7 @@ namespace MusicBeePlugin
         private PluginInfo about = new PluginInfo();
 
         private LyricsViewControl _lyricsViewControl;
-        private Timer _positionTimer;
+        private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
@@ -36,26 +36,6 @@ namespace MusicBeePlugin
             return about;
         }
 
-        // presence of this method tells MusicBee the plugin has a dockable panel
-        public int OnDockablePanelCreated(Control panel)
-        {
-            // created here because this method runs on the UI thread; a WinForms Timer
-            // created on another thread never ticks
-            if (_positionTimer == null)
-            {
-                _positionTimer = new Timer();
-                _positionTimer.Interval = 50;
-                _positionTimer.Tick += PositionTimer_Tick;
-            }
-
-            _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
-            _lyricsViewControl.SetLyrics(_currentLyrics);
-            panel.Controls.Add(_lyricsViewControl);
-
-            UpdateTimerState();
-            SyncPosition();
-            return -1;   // < 0: resizable, fills the space the panel is docked to
-        }
 
         public bool Configure(IntPtr panelHandle)
         {
@@ -65,7 +45,7 @@ namespace MusicBeePlugin
                 Label prompt = new Label();
                 prompt.AutoSize = true;
                 prompt.Location = new Point(0, 0);
-                prompt.Text = "LRC Lyrics Panel has no settings.";
+                prompt.Text = "Coming soon: configuration options for the LRC Lyrics Panel plugin.";
                 configPanel.Controls.Add(prompt);
             }
             return false;
@@ -87,6 +67,27 @@ namespace MusicBeePlugin
 
         public void Uninstall()
         {
+        }
+
+        // presence of this method tells MusicBee the plugin has a dockable panel
+        public int OnDockablePanelCreated(Control panel)
+        {
+            // created here because this method runs on the UI thread; a WinForms Timer
+            // created on another thread never ticks
+            if (_positionTimer == null)
+            {
+                _positionTimer = new System.Timers.Timer();
+                _positionTimer.AutoReset = true;
+                _positionTimer.Elapsed += PositionTimer_Elapsed;
+            }
+
+            _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
+            _lyricsViewControl.SetLyrics(_currentLyrics);
+            panel.Controls.Add(_lyricsViewControl);
+
+            UpdateTimerState();
+            SyncPosition();
+            return 0;   // < 0: resizable, fills the space the panel is docked to
         }
 
         private void RunOnUiThreadYouMf(Action action)
@@ -117,8 +118,11 @@ namespace MusicBeePlugin
                     break;
 
                 case NotificationType.PlayStateChanged:
-                    UpdateTimerState();
-                    SyncPosition();
+                    RunOnUiThreadYouMf(() =>
+                    {
+                        UpdateTimerState();
+                        SyncPosition();
+                    });
                     break;
             }
         }
@@ -187,7 +191,7 @@ namespace MusicBeePlugin
             _lyricsViewControl.UpdatePosition(TimeSpan.FromMilliseconds(positionMs));
         }
 
-        private void PositionTimer_Tick(object sender, EventArgs e)
+        private void PositionTimer_Elapsed(object sender, EventArgs e)
         {
             SyncPosition();
         }
