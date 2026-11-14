@@ -86,6 +86,7 @@
     <Compile Include="Modern_lyrics\Models\LrcModels.cs" />
     <Compile Include="Modern_lyrics\EnhancedLrcParser.cs" />
     <Compile Include="Modern_lyrics\MB_modern_lyrics.cs" />
+    <Compile Include="Modern_lyrics\LyricsViewControl.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
