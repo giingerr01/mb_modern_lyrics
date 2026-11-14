@@ -49,12 +49,51 @@ namespace MusicBeePlugin
                     }
                     continue;
                 }
+                //collecting leading timestamps and the text
                 var lineMatch = LineTimestampRegex.Match(trimmedLine);
                 if (!lineMatch.Success)
                 {
                     continue;
                 }
 
+                //collecting every loading timestamp on the line
+                var starts = new List<TimeSpan>();
+                foreach (Match match in SingleStampRegex.Matches(lineMatch.
+                Groups["stamps"].Value))
+                {
+                    string timestamp = match.Groups["ts"].Value;
+                    starts.Add(ParseTimestamp(timestamp));
+                }
+
+                if (starts.Count == 0)
+                {
+                    continue;
+                }
+
+                string content = lineMatch.Groups["text"].Value;
+                var templateWords = ParseWords(content, starts[0]);
+
+                //one lyricline par timestamp
+
+                foreach (TimeSpan lineStart in starts)
+                {
+                    TimeSpan shift = lineStart - starts[0];
+                    var lyricLine = new LyricLine
+                    {
+                        StartTime = lineStart,
+                    };
+
+                    foreach (var word in templateWords)
+                    {
+                        lyricLine.Words.Add(new LyricWord
+                        {
+                            Text = word.Text,
+                            StartTime = word.startTime + shift,
+                        });
+                    }
+                    lyricLine.FullText = string.Concat(lyricLine.Words.ConvertAll(word => word.Text));
+                    result.Lines.Add(lyricLine);
+                }
             }
 
             return result;
