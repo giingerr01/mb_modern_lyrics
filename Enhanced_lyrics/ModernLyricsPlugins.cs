@@ -23,7 +23,7 @@ namespace MusicBeePlugin
             about.Name = "LRC Lyrics Panel";
             about.Description = "Line-by-line synchronized (LRC) lyrics panel.";
             about.Author = "giingerr01";
-            about.TargetApplication = "";
+            about.TargetApplication = "LRC Lyrics";
             about.Type = PluginType.PanelView;
             about.VersionMajor = 1;
             about.VersionMinor = 0;
@@ -72,18 +72,26 @@ namespace MusicBeePlugin
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
-            // created here because this method runs on the UI thread; a WinForms Timer
-            // created on another thread never ticks
             if (_positionTimer == null)
             {
                 _positionTimer = new System.Timers.Timer();
                 _positionTimer.AutoReset = true;
                 _positionTimer.Elapsed += PositionTimer_Elapsed;
             }
-
+            _lyricsViewControl?.Dispose();
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
             _lyricsViewControl.SetLyrics(_currentLyrics);
             panel.Controls.Add(_lyricsViewControl);
+
+            //makeing  sure that the lyrics are loaded even if plugin startup fired bfore panel creating
+            if (_currentLyrics == null || _currentLyrics.Lines.Count == 0)
+            {
+                LoadCurrentTrackLyrics();
+            }
+            else
+            {
+                _lyricsViewControl.SetLyrics(_currentLyrics);
+            }
 
             UpdateTimerState();
             SyncPosition();
