@@ -11,6 +11,7 @@ namespace MusicBeePlugin
         private static readonly Regex HeaderTagRegex = new Regex(@"^\[(?<key>[a-zA-Z]+):(?<value>.*)\]$", RegexOptions.Compiled);
         private static readonly Regex LineTimestampRegex = new Regex(@"^\[(?<timestamp>\d{1,2}:\d{2}(?:\.\d{1,3})?)\](?<text>.*)$", RegexOptions.Compiled);
 
+        public static readonly Regex SingleStampRegex = new Regex(@"\[(?<ts>\d+:\d{2}(?:\.\d{1,3})?)\]", RegexOptions.Compiled);
         public static readonly Regex WordTimestampRegex = new Regex(@"<(?<min>\d+):(?<sec>\d+(?:\.\d+)?)>(?<text>[^<]*)", RegexOptions.Compiled);
 
         public static ParsedLyrics Parse(string rawLrc)
@@ -50,46 +51,26 @@ namespace MusicBeePlugin
                     continue;
                 }
 
-                TimeSpan lineStart = ParseTimestamp(lineMatch.Groups["timestamp"].Value);
-                string lineContent = trimmedLine.Substring(lineMatch.Length); // +2 for the brackets
-                var lyricLine = new LyricLine
+                var starts = new List<TimeSpan>();
+                foreach (Match sm in SingleStampRegex.Matches(lineMatch.Groups["stamps"].Value))
                 {
-                    StartTime = lineStart + result.Offset
-                };
-
-                var wordMatches = WordTimestampRegex.Matches(lineContent);
-                if (wordMatches.Count > 0)
-                {
-                    foreach (Match wm in wordMatches)
-                    {
-                        TimeSpan wordStart = ParseTimestamp(wm.Groups["min"].Value,
-                        wm.Groups["sec"].Value)
-                        + result.Offset;
-                        string text = wm.Groups["text"].Value;
-
-                        lyricLine.Words.Add(new LyricWord
-                        {
-                            StartTime = wordStart,
-                            Text = text
-                        });
-                    }
-
-                    for (int i = 0; i < lyricLine.Words.Count - 1; i++)
-                    {
-                        lyricLine.Words[i].EndTime = lyricLine.Words[i + 1].StartTime;
-                    }
-                    lyricLine.FullText = string.Concat(lyricLine.Words.ConvertAll(w => w.Text));
+                    starts.Add(ParseTimestamp(sm.Groups["ts"].Value));
                 }
-                else
-                {
-                    lyricLine.FullText = lineContent;
-                    lyricLine.Words.Add(new LyricWord
-                    {
-                        StartTime = lyricLine.StartTime,
-                        Text = lineContent
-                    });
 
+                string content = lineMatch.Groups["text"].Value;
+                var templateWords = ParseWords(content, starts[0]);
+
+                foreach (TimeSpan linestart in starts)
+                {
+                    TimeSpan shift = linestart - starts[0];
+                    var lyricLine = new LyricLine
+                    {
+                        StartTime = lineStart
+                    }
                 }
+
+
+
             }
 
             return result;
