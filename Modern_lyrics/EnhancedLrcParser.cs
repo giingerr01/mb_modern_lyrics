@@ -175,11 +175,18 @@ namespace MusicBeePlugin
                     line.EndTime = (lastStart > line.StartTime
                     ? lastStart : line.StartTime) + LastLineDuration;
                 }
+                foreach (int w == 0; w < line.Words.Count; w++)
+                {
+                line.Words[w].EndTime = (w + 1 < line.Words.Count
+                ? line.Words[w + 1].StartTime
+                : line.EndTime);
             }
         }
 
-
-
+        private static TimeSpan Clamp(TimeSpan time)
+        {
+            return time < TimeSpan.Zero ? TimeSpan.Zero : time;
+        }
 
         private static TimeSpan ParseTimestamp(string timestamp)
         {
