@@ -14,6 +14,8 @@ namespace MusicBeePlugin
         public static readonly Regex SingleStampRegex = new Regex(@"\[(?<ts>\d+:\d{2}(?:\.\d{1,3})?)\]", RegexOptions.Compiled);
         public static readonly Regex WordTimestampRegex = new Regex(@"<(?<min>\d+):(?<sec>\d+(?:\.\d+)?)>(?<text>[^<]*)", RegexOptions.Compiled);
 
+        public static readonly TimeSpan LastLineDuration = TimeSpan.FromSeconds(5);
+
         public static ParsedLyrics Parse(string rawLrc)
         {
             var result = new ParsedLyrics();
@@ -60,13 +62,13 @@ namespace MusicBeePlugin
                 string content = lineMatch.Groups["text"].Value;
                 var templateWords = ParseWords(content, starts[0]);
 
-                foreach (TimeSpan linestart in starts)
+                foreach (TimeSpan lineStart in starts)
                 {
-                    TimeSpan shift = linestart - starts[0];
+                    TimeSpan shift = lineStart - starts[0];
                     var lyricLine = new LyricLine
                     {
                         StartTime = lineStart
-                    }
+                    };
                 }
 
 
