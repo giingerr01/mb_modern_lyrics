@@ -12,6 +12,7 @@ namespace MusicBeePlugin
         private PluginInfo about = new PluginInfo();
 
         private LyricsViewControl _lyricsViewControl;
+        private Control _dockablePanel;
         private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
 
@@ -74,7 +75,20 @@ namespace MusicBeePlugin
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
+            if (panel == null)
+            {
+                return 0;
+            }
+
+
+            //these three lines has caused me so much problem
+            if (panel.InvokeRequired)
+            {
+                return (int)panel.Invoke(new Func<int>(() => OnDockablePanelCreated(panel)));
+            }
+
             System.Diagnostics.Debug.WriteLine("<OnDocablePanelCreated()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            _dockablePanel = panel;
             if (_positionTimer == null)
             {
                 _positionTimer = new System.Timers.Timer();
@@ -103,9 +117,10 @@ namespace MusicBeePlugin
 
         private void RunOnUiThreadYouMf(Action action)
         {
-            if (_lyricsViewControl != null && _lyricsViewControl.IsHandleCreated && _lyricsViewControl.InvokeRequired)
+            Control uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
+            if (uiControl != null && uiControl.InvokeRequired)
             {
-                _lyricsViewControl.BeginInvoke(action);
+                uiControl.BeginInvoke(action);
             }
             else
             {
@@ -210,12 +225,19 @@ namespace MusicBeePlugin
         private void PositionTimer_Elapsed(object sender, EventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("<PositionTimer_Elapsed()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-            var view = _lyricsViewControl;
-            if (view == null || view.IsDisposed || !view.IsHandleCreated)
+            var uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
+            if (uiControl == null || uiControl.IsDisposed || !uiControl.IsHandleCreated)
             {
                 return;
             }
-            view.BeginInvoke((Action)SyncPosition);
+            if (uiControl.InvokeRequired)
+            {
+                uiControl.BeginInvoke((Action)SyncPosition);
+            }
+            else
+            {
+                SyncPosition();
+            }
         }
 
         public List<ToolStripItem> GetHeaderMenuItems()
