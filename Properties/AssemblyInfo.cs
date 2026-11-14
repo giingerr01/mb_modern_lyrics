@@ -5,8 +5,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MB Modern Lyrics")]
-[assembly: AssemblyDescription("A MusicBee plugin for modern lyrics.")]
+[assembly: AssemblyTitle("MusicBee Modern Lyrics Panel")]
+[assembly: AssemblyDescription("A MusicBee plugin for Enhanced lyrics.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("giingerr01")]
 [assembly: AssemblyProduct("MB Modern Lyrics")]
