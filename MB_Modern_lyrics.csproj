@@ -82,7 +82,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MusicBeeInterface.cs" />
+    <Compile Include="Modern_Lyrics\MusicBeeInterface.cs" />
     <Compile Include="Modern_lyrics\**\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
