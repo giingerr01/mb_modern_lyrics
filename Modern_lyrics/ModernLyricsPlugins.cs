@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin
@@ -19,11 +20,11 @@ namespace MusicBeePlugin
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
             about.PluginInfoVersion = 1;
-            about.Name = "Enhanced Lyrics";
-            about.Description = "A MusicBee plugin word by word lyrics parser.";
+            about.Name = "LRC Lyrics Panel";
+            about.Description = "Line-by-line synchronized (LRC) lyrics panel.";
             about.Author = "giingerr01";
-            about.TargetApplication = "E-Lyrics";
-            about.Type = PluginType.General;
+            about.TargetApplication = "";
+            about.Type = PluginType.PanelView;
             about.VersionMajor = 1;
             about.VersionMinor = 0;
             about.Revision = 1;
@@ -33,7 +34,7 @@ namespace MusicBeePlugin
             about.ConfigurationPanelHeight = 0;
 
             _positionTimer = new Timer();
-            _positionTimer.Interval = 100;
+            _positionTimer.Interval = 50;
             _positionTimer.Tick += PositionTimer_Tick;
             return about;
         }
@@ -41,23 +42,30 @@ namespace MusicBeePlugin
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
+            float dpiScaling;
+            using (Graphics g = panel.CreateGraphics())
+            {
+                dpiScaling = g.DpiY / 96f;
+            }
+
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
             _lyricsViewControl.SetLyrics(_currentLyrics);
             panel.Controls.Add(_lyricsViewControl);
+
+            UpdateTimerState();
             SyncPosition();
-            return -1;   // < 0: resizable, fills the space the panel is docked to
+            return Convert.ToInt32(300 * dpiScaling);   // initial panel height
         }
 
         public bool Configure(IntPtr panelHandle)
         {
-            string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
             if (panelHandle != IntPtr.Zero)
             {
                 Panel configPanel = (Panel)Control.FromHandle(panelHandle);
                 Label prompt = new Label();
                 prompt.AutoSize = true;
                 prompt.Location = new Point(0, 0);
-                prompt.Text = "Enhanced Lyrics Plugin config";
+                prompt.Text = "LRC Lyrics Panel has no settings.";
                 configPanel.Controls.Add(prompt);
             }
             return false;
@@ -65,7 +73,6 @@ namespace MusicBeePlugin
 
         public void SaveSettings()
         {
-            string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
         }
 
         public void Close(PluginCloseReason reason)
@@ -108,14 +115,43 @@ namespace MusicBeePlugin
             {
                 rawLyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
             }
+            if (string.IsNullOrWhiteSpace(rawLyrics))
+            {
+                rawLyrics = ReadSidecarLrc();
+            }
 
-            _currentLyrics = EnhancedLrcParser.Parse(rawLyrics);
+            _currentLyrics = LrcParser.Parse(rawLyrics);
             _lyricsViewControl?.SetLyrics(_currentLyrics);
             SyncPosition();
         }
 
+        // song.flac -> song.lrc next to it
+        private string ReadSidecarLrc()
+        {
+            try
+            {
+                string url = mbApiInterface.NowPlaying_GetFileUrl();
+                if (string.IsNullOrEmpty(url))
+                {
+                    return null;
+                }
+
+                string lrcPath = Path.ChangeExtension(url, ".lrc");
+                return File.Exists(lrcPath) ? File.ReadAllText(lrcPath) : null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         private void UpdateTimerState()
         {
+            if (_positionTimer == null)
+            {
+                return;
+            }
+
             if (mbApiInterface.Player_GetPlayState() == PlayState.Playing)
             {
                 _positionTimer.Start();
