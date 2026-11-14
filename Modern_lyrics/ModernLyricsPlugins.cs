@@ -33,19 +33,19 @@ namespace MusicBeePlugin
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
             about.ConfigurationPanelHeight = 0;
 
-            _positionTimer = new Timer();
-            _positionTimer.Interval = 50;
-            _positionTimer.Tick += PositionTimer_Tick;
             return about;
         }
 
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
-            float dpiScaling;
-            using (Graphics g = panel.CreateGraphics())
+            // created here because this method runs on the UI thread; a WinForms Timer
+            // created on another thread never ticks
+            if (_positionTimer == null)
             {
-                dpiScaling = g.DpiY / 96f;
+                _positionTimer = new Timer();
+                _positionTimer.Interval = 50;
+                _positionTimer.Tick += PositionTimer_Tick;
             }
 
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
@@ -54,7 +54,7 @@ namespace MusicBeePlugin
 
             UpdateTimerState();
             SyncPosition();
-            return Convert.ToInt32(300 * dpiScaling);   // initial panel height
+            return -1;   // < 0: resizable, fills the space the panel is docked to
         }
 
         public bool Configure(IntPtr panelHandle)
@@ -89,6 +89,18 @@ namespace MusicBeePlugin
         {
         }
 
+        private void RunOnUiThreadYouMf(Action action)
+        {
+            if (_lyricsViewControl != null && _lyricsViewControl.IsHandleCreated && _lyricsViewControl.InvokeRequired)
+            {
+                _lyricsViewControl.BeginInvoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
         public void ReceiveNotification(string sourceFileUrl, NotificationType type)
         {
             switch (type)
@@ -97,8 +109,11 @@ namespace MusicBeePlugin
                 case NotificationType.TrackChanged:
                 case NotificationType.PlayingTracksChanged:
                 case NotificationType.NowPlayingLyricsReady:
-                    LoadCurrentTrackLyrics();
-                    UpdateTimerState();
+                    RunOnUiThreadYouMf(() =>
+                        {
+                            LoadCurrentTrackLyrics();
+                            UpdateTimerState();
+                        });
                     break;
 
                 case NotificationType.PlayStateChanged:
