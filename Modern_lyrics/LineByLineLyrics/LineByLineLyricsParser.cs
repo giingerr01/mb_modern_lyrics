@@ -1,22 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace MusicBeePlugin
 {
-    public static class EnhancedLrcParser
+    // Standard line-by-line LRC:
+    //   [ar:Artist] [ti:Title] [offset:+500]
+    //   [00:12.00]First line
+    //   [00:15.50][01:05.20]Line that repeats
+    public static class LrcParser
     {
-        // [ar:Artist], [ti:Title], [offset:+500] ...
+        // [ar:Artist], [ti:Title], [offset:+500] ... (key is letters only, so timestamps never match)
         private static readonly Regex HeaderTagRegex = new Regex(
             @"^\[(?<key>[a-zA-Z]+):(?<value>.*)\]$", RegexOptions.Compiled);
 
-        // One or more leading timestamps followed by the text: [00:12.00][01:30.00]text
+        // One or more leading timestamps followed by the text.
+        // Fraction separator may be '.' or ':' ([mm:ss.xx] or [mm:ss:xx]), fraction is optional.
         private static readonly Regex LineRegex = new Regex(
-            @"^(?<stamps>(?:\[\d+:\d{2}(?:\.\d{1,3})?\])+)(?<text>.*)$", RegexOptions.Compiled);
+            @"^(?<stamps>(?:\[\d+:\d{2}(?:[.:]\d{1,3})?\])+)(?<text>.*)$", RegexOptions.Compiled);
 
         private static readonly Regex SingleStampRegex = new Regex(
-            @"\[(?<ts>\d+:\d{2}(?:\.\d{1,3})?)\]", RegexOptions.Compiled);
+            @"\[(?<ts>\d+:\d{2}(?:[.:]\d{1,3})?)\]", RegexOptions.Compiled);
 
         private static readonly TimeSpan LastLineDuration = TimeSpan.FromSeconds(5);
 
@@ -74,21 +80,19 @@ namespace MusicBeePlugin
                 }
             }
 
+            // no timestamps at all: plain, unsynchronized lyrics (file order is kept as-is)
             if (result.Lines.Count == 0)
             {
                 result.IsSynchronized = false;
                 foreach (string text in plainLines)
                 {
-                    result.Lines.Add(new LyricLine
-                    {
-                        StartTime = TimeSpan.Zero,
-                        EndTime = LastLineDuration,
-                        Text = text
-                    });
+                    result.Lines.Add(new LyricLine { Text = text });
                 }
+                return result;
             }
 
-            result.Lines.Sort((a, b) => a.StartTime.CompareTo(b.StartTime));
+            // OrderBy is stable, so lines sharing a timestamp keep their file order
+            result.Lines = result.Lines.OrderBy(l => l.StartTime).ToList();
 
             ApplyOffset(result);
             AssignEndTimes(result);
@@ -123,9 +127,20 @@ namespace MusicBeePlugin
 
         private static TimeSpan ParseTimestamp(string timestamp)
         {
+            // "mm:ss", "mm:ss.xx", "mm:ss.xxx" or "mm:ss:xx"
             string[] parts = timestamp.Split(':');
             int minutes = int.Parse(parts[0], CultureInfo.InvariantCulture);
-            double seconds = double.Parse(parts[1], CultureInfo.InvariantCulture);
+            string secondsText = parts[1];
+            if (parts.Length > 2)
+            {
+                secondsText += "." + parts[2];
+            }
+            else
+            {
+                secondsText = secondsText.Replace(',', '.');
+            }
+
+            double seconds = double.Parse(secondsText, CultureInfo.InvariantCulture);
             return TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(seconds);
         }
     }
