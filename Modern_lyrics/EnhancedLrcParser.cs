@@ -96,8 +96,90 @@ namespace MusicBeePlugin
                 }
             }
 
+            result.Lines.Sort((a, b) => a.StartTime.CompareTo(b.StartTime));
+
+            ApplyOffsets(result);
+            AssignEndTimes(result);
             return result;
         }
+
+        private static List<LyricWord> ParseWords(string content, TimeSpan lineStart)
+        {
+            var words = new List<LyricWord>();
+            var wordMatches = WordTimestampRegex.Matches(content);
+
+            if (wordMatches.Count == 0)
+            {
+                words.Add(new LyricWord
+                {
+                    Text = content,
+                    StartTime = lineStart,
+                });
+                return words;
+            }
+
+            string leading = content.Substring(0, wordMatches[0].Index);
+            if (leading.Length > 0)
+            {
+                words.Add(new LyricWord
+                {
+                    Text = leading,
+                    StartTime = lineStart,
+                });
+            }
+
+            foreach (Match wm in wordMatches)
+            {
+                string text = wm.Groups["text"].Value;
+                TimeSpan startTime = ParseTimestamp(wm.Groups["min"].Value, wm.Groups["sec"].Value);
+                words.Add(new LyricWord
+                {
+                    Text = text,
+                    StartTime = startTime,
+                });
+            }
+            return words;
+        }
+
+        private static void ApllyOffsets(ParsedLyrics result)
+        {
+            if (result.Offset == TimeSpan.Zero)
+            {
+                return;
+            }
+
+            foreach (var line in result.Lines)
+            {
+                line.StartTime = Clamp(line.StartTime - result.Offset);
+                foreach (var word in line.Words)
+                {
+                    word.StartTime = Clamp(word.StartTime - result.Offset);
+                }
+            }
+        }
+
+        private static void AssignEndTimes(ParsedLyrics result)
+        {
+            for (int i = 0; i < result.Lines.Count; i++)
+            {
+                var line = result.Lines[i];
+                if (i + 1 < result.Lines.Count)
+                {
+                    line.EndTime = result.Lines[i + 1].StartTime;
+                }
+                else
+                {
+                    TimeSpan lastStart = line.Words.Count > 0
+                    ? line.Words[line.Words.Count - 1].StartTime
+                    : line.StartTime;
+                    line.EndTime = (lastStart > line.StartTime
+                    ? lastStart : line.StartTime) + LastLineDuration;
+                }
+            }
+        }
+
+
+
 
         private static TimeSpan ParseTimestamp(string timestamp)
         {
