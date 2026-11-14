@@ -41,7 +41,9 @@ namespace MusicBeePlugin
                     string value = metaMatch.Groups["value"].Value;
                     result.Metadata[key] = value;
 
-                    if (key == "offset" && double.TryParse(value, out double offset))
+                    if (key == "offset" && double.TryParse(
+                        value.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out double offset
+                    ))
                     {
                         result.Offset = TimeSpan.FromMilliseconds(offset);
                     }
@@ -52,26 +54,6 @@ namespace MusicBeePlugin
                 {
                     continue;
                 }
-
-                var starts = new List<TimeSpan>();
-                foreach (Match sm in SingleStampRegex.Matches(lineMatch.Groups["stamps"].Value))
-                {
-                    starts.Add(ParseTimestamp(sm.Groups["ts"].Value));
-                }
-
-                string content = lineMatch.Groups["text"].Value;
-                var templateWords = ParseWords(content, starts[0]);
-
-                foreach (TimeSpan lineStart in starts)
-                {
-                    TimeSpan shift = lineStart - starts[0];
-                    var lyricLine = new LyricLine
-                    {
-                        StartTime = lineStart
-                    };
-                }
-
-
 
             }
 
