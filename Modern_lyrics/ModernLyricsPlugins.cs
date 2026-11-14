@@ -19,10 +19,10 @@ namespace MusicBeePlugin
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
             about.PluginInfoVersion = 1;
-            about.Name = "MB Enhanced Lyrics Panel";
+            about.Name = "Enhanced Lyrics";
             about.Description = "A MusicBee plugin word by word lyrics parser.";
             about.Author = "giingerr01";
-            about.TargetApplication = "MusicBee";
+            about.TargetApplication = "E-Lyrics";
             about.Type = PluginType.General;
             about.VersionMajor = 1;
             about.VersionMinor = 0;
