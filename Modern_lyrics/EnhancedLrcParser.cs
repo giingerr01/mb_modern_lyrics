@@ -109,6 +109,5 @@ namespace MusicBeePlugin
             double parsedSeconds = double.Parse(seconds, CultureInfo.InvariantCulture);
             return TimeSpan.FromMinutes(parsedMinutes) + TimeSpan.FromSeconds(parsedSeconds);
         }
-
     }
 }
