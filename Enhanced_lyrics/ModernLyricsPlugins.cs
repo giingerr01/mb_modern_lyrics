@@ -17,6 +17,7 @@ namespace MusicBeePlugin
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
+            System.Diagnostics.Debug.WriteLine("<Inialize()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
             about.PluginInfoVersion = 1;
@@ -39,6 +40,7 @@ namespace MusicBeePlugin
 
         public bool Configure(IntPtr panelHandle)
         {
+            System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             if (panelHandle != IntPtr.Zero)
             {
                 Panel configPanel = (Panel)Control.FromHandle(panelHandle);
@@ -72,6 +74,7 @@ namespace MusicBeePlugin
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
+            System.Diagnostics.Debug.WriteLine("<OnDocablePanelCreated()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             if (_positionTimer == null)
             {
                 _positionTimer = new System.Timers.Timer();
@@ -90,12 +93,12 @@ namespace MusicBeePlugin
             }
             else
             {
-                _lyricsViewControl.SetLyrics(_currentLyrics);
+                _lyricsViewControl?.SetLyrics(_currentLyrics);
             }
 
             UpdateTimerState();
             SyncPosition();
-            return 0;   // < 0: resizable, fills the space the panel is docked to
+            return 600;   // < 0: resizable, fills the space the panel is docked to
         }
 
         private void RunOnUiThreadYouMf(Action action)
@@ -148,8 +151,13 @@ namespace MusicBeePlugin
             }
 
             _currentLyrics = LrcParser.Parse(rawLyrics);
-            _lyricsViewControl?.SetLyrics(_currentLyrics);
-            SyncPosition();
+            if (_lyricsViewControl != null && !_lyricsViewControl.IsDisposed)
+            {
+                _lyricsViewControl.SetLyrics(_currentLyrics);
+                SyncPosition();
+                return;
+            }
+            // _lyricsViewControl?.SetLyrics(_currentLyrics);
         }
 
         // song.flac -> song.lrc next to it
@@ -201,7 +209,13 @@ namespace MusicBeePlugin
 
         private void PositionTimer_Elapsed(object sender, EventArgs e)
         {
-            SyncPosition();
+            System.Diagnostics.Debug.WriteLine("<PositionTimer_Elapsed()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            var view = _lyricsViewControl;
+            if (view == null || view.IsDisposed || !view.IsHandleCreated)
+            {
+                return;
+            }
+            view.BeginInvoke((Action)SyncPosition);
         }
 
         public List<ToolStripItem> GetHeaderMenuItems()
