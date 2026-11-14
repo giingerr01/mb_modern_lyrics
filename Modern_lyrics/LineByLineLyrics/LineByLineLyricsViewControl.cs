@@ -84,6 +84,13 @@ namespace MusicBeePlugin
                 return;
             }
 
+            if (!_lyrics.IsSynchronized)
+            {
+                string text = string.Join(Environment.NewLine, _lyrics.Lines.ConvertAll(line => line.Text));
+                g.DrawString(text, _inactiveFont, _inactiveBrush, ClientRectangle, _format);
+                return;
+            }
+
             int lineHeight = (int)(_activeFont.GetHeight(g) * 2f);
             int activeY = (ClientSize.Height - lineHeight) / 2;
             int width = Math.Max(1, ClientSize.Width - HorizontalPadding * 2);

@@ -22,7 +22,7 @@ namespace MusicBeePlugin
             about.Name = "MB Enhanced Lyrics Panel";
             about.Description = "A MusicBee plugin word by word lyrics parser.";
             about.Author = "giingerr01";
-            about.TargetApplication = "Enhanced Lyrics";   // panel header text
+            about.TargetApplication = "MusicBee";
             about.Type = PluginType.General;
             about.VersionMajor = 1;
             about.VersionMinor = 0;
@@ -88,7 +88,8 @@ namespace MusicBeePlugin
             {
                 case NotificationType.PluginStartup:
                 case NotificationType.TrackChanged:
-                case NotificationType.NowPlayingListChanged:
+                case NotificationType.PlayingTracksChanged:
+                case NotificationType.NowPlayingLyricsReady:
                     LoadCurrentTrackLyrics();
                     UpdateTimerState();
                     break;
@@ -102,9 +103,12 @@ namespace MusicBeePlugin
 
         private void LoadCurrentTrackLyrics()
         {
-            string rawLyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
+            string rawLyrics = mbApiInterface.NowPlaying_GetLyrics();
+            if (string.IsNullOrWhiteSpace(rawLyrics))
+            {
+                rawLyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
+            }
 
-            // Parse returns an empty result for null/blank text
             _currentLyrics = EnhancedLrcParser.Parse(rawLyrics);
             _lyricsViewControl?.SetLyrics(_currentLyrics);
             SyncPosition();

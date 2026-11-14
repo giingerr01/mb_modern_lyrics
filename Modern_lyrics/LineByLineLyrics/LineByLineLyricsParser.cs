@@ -29,6 +29,7 @@ namespace MusicBeePlugin
             }
 
             string[] lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var plainLines = new List<string>();
 
             foreach (string line in lines)
             {
@@ -56,6 +57,7 @@ namespace MusicBeePlugin
                 var lineMatch = LineRegex.Match(trimmed);
                 if (!lineMatch.Success)
                 {
+                    plainLines.Add(trimmed);
                     continue;
                 }
 
@@ -67,6 +69,20 @@ namespace MusicBeePlugin
                     result.Lines.Add(new LyricLine
                     {
                         StartTime = ParseTimestamp(sm.Groups["ts"].Value),
+                        Text = text
+                    });
+                }
+            }
+
+            if (result.Lines.Count == 0)
+            {
+                result.IsSynchronized = false;
+                foreach (string text in plainLines)
+                {
+                    result.Lines.Add(new LyricLine
+                    {
+                        StartTime = TimeSpan.Zero,
+                        EndTime = LastLineDuration,
                         Text = text
                     });
                 }
