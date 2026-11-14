@@ -13,6 +13,10 @@ namespace MusicBeePlugin
         private MusicBeeApiInterface mbApiInterface;
         private PluginInfo about = new PluginInfo();
 
+        private LyricsViewControl _lyricsViewControl;
+        private Timer _positiontimer;
+
+
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
             mbApiInterface = new MusicBeeApiInterface();
@@ -30,26 +34,25 @@ namespace MusicBeePlugin
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
             about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
+
+            _lyricsViewControl = new LyricsViewControl();
+            _positiontimer = new Timer();
+            _positiontimer.Interval = 30; // Update every 100 ms
+            _positiontimer.Tick += PostionTimer_Tick;
             return about;
         }
 
         public bool Configure(IntPtr panelHandle)
         {
-            // save any persistent settings in a sub-folder of this path
             string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
-            // panelHandle will only be set if you set about.ConfigurationPanelHeight to a non-zero value
-            // keep in mind the panel width is scaled according to the font the user has selected
-            // if about.ConfigurationPanelHeight is set to 0, you can display your own popup window
             if (panelHandle != IntPtr.Zero)
             {
-                Panel configPanel = (Panel)Panel.FromHandle(panelHandle);
+                Panel configPanel = (Panel)Control.FromHandle(panelHandle);
                 Label prompt = new Label();
                 prompt.AutoSize = true;
                 prompt.Location = new Point(0, 0);
-                prompt.Text = "prompt:";
-                TextBox textBox = new TextBox();
-                textBox.Bounds = new Rectangle(60, 0, 100, textBox.Height);
-                configPanel.Controls.AddRange(new Control[] { prompt, textBox });
+                prompt.Text = "Enhanced Lyrics Plugin config";
+                configPanel.Controls.Add(prompt);
             }
             return false;
         }
@@ -100,7 +103,10 @@ namespace MusicBeePlugin
         public List<ToolStripItem> GetHeaderMenuItems()
         {
             List<ToolStripItem> list = new List<ToolStripItem>();
-            list.Add(new ToolStripMenuItem("A menu item"));
+            list.Add(new ToolStripMenuItem("Reload Lyrics", null, (s, e) =>
+            {
+                _loadCurrent.ReloadLyrics();
+            }));
             return list;
         }
 
@@ -108,6 +114,17 @@ namespace MusicBeePlugin
         {
             e.Graphics.Clear(Color.Red);
             TextRenderer.DrawText(e.Graphics, "hello", SystemFonts.CaptionFont, new Point(10, 10), Color.Blue);
+        }
+
+        private void PostionTimer_Tick(object sender, EventArgs e)
+        {
+            if (mbApiInterface.Player_GetPlayState() == PlayState.Playing)
+            {
+                int positionMs = mbApiInterface.Player_GetPosition();
+                TimeSpan currentPosition = TimeSpan.FromMilliseconds(positionMs);
+                _lyricsViewControl.UpdatePosition(currentPosition);
+
+            }
         }
     }
 }
