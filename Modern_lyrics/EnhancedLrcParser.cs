@@ -12,8 +12,8 @@ namespace MusicBeePlugin
         private static readonly Regex LineTimestampRegex = new Regex(@"^(?<stamps>(?:\[\d{1,2}:\d{2}(?:\.\d{1,3})?\])*)(?<text>.*)$", RegexOptions.Compiled);
 
         public static readonly Regex SingleStampRegex = new Regex(@"\[(?<ts>\d{1,2}:\d{2}(?:\.\d{1,3})?)\]", RegexOptions.Compiled);
-        public static readonly Regex WordTimestampRegex = new Regex(@"<(?<min>\d+):(?<sec>\d+(?:\.\d+)?)>(?<text>[^<]*)", RegexOptions.Compiled);
 
+        public static readonly Regex WordTimestampRegex = new Regex(@"<(?<min>\d+):(?<sec>\d+(?:\.\d+)?)>(?<text>[^<]*)", RegexOptions.Compiled);
         public static readonly TimeSpan LastLineDuration = TimeSpan.FromSeconds(5);
 
         public static ParsedLyrics Parse(string rawLrc)

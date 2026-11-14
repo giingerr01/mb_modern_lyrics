@@ -25,7 +25,7 @@ namespace MusicBeePlugin
             about.Name = "MB Enhanced Lyrics Panel";
             about.Description = "A MusicBee plugin word by word lyrics parser.";
             about.Author = "giingerr01";
-            about.TargetApplication = "";   //  the name of a Plugin Storage device or panel header for a dockable panel
+            about.TargetApplication = "Enhanced Lyrics";
             about.Type = PluginType.General;
             about.VersionMajor = 1;
             about.VersionMinor = 0;
@@ -40,6 +40,11 @@ namespace MusicBeePlugin
             _positiontimer.Interval = 30; // Update every 100 ms
             _positiontimer.Tick += PostionTimer_Tick;
             return about;
+        }
+
+        public Control GetDisplayCanvas()
+        {
+            return _lyricsViewControl;
         }
 
         public bool Configure(IntPtr panelHandle)
@@ -68,6 +73,9 @@ namespace MusicBeePlugin
         // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
         public void Close(PluginCloseReason reason)
         {
+            _positiontimer.Stop();
+            _positiontimer.Dispose();
+            _lyricsViewControl?.Dispose();
         }
 
         // uninstall this plugin - clean up any persisted files
@@ -83,31 +91,61 @@ namespace MusicBeePlugin
             switch (type)
             {
                 case NotificationType.PluginStartup:
-                    // perform startup initialisation
-                    switch (mbApiInterface.Player_GetPlayState())
+                case NotificationType.TrackChanged:
+                case NotificationType.NowPlayingListChanged:
+                    LoadCurrentTrackLyrics();
+
+                    if (mbApiInterface.Player_GetPlayState() == PlayState.Playing)
                     {
-                        case PlayState.Playing:
-                        case PlayState.Paused:
-                            // ...
-                            break;
+                        _positiontimer.Start();
+                    }
+                    else
+                    {
+                        _positiontimer.Stop();
                     }
                     break;
-                case NotificationType.TrackChanged:
-                    string artist = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
-                    string lyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
-                    // ...
+
+                case NotificationType.PlayStateChanged:
+                    PlayState state = mbApiInterface.Player_GetPlayState();
+                    if (state == PlayState.Playing)
+                    {
+                        _positiontimer.Start();
+                    }
+                    else
+                    {
+                        _positiontimer.Stop();
+                    }
                     break;
             }
+        }
+
+        private void LoadCurrentTrackLyrics()
+        {
+            string rawlyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
+            if (!string.IsNullOrEmpty(rawlyrics))
+            {
+                _lyricsViewControl.SetLyrics(new ParsedLyrics());
+                return;
+            }
+            ParsedLyrics parsed = EnhancedLrcParser.Parse(rawlyrics);
+            _lyricsViewControl.SetLyrics(parsed);
+
         }
 
         public List<ToolStripItem> GetHeaderMenuItems()
         {
             List<ToolStripItem> list = new List<ToolStripItem>();
             list.Add(new ToolStripMenuItem("Reload Lyrics", null, (s, e) =>
-            {
-                _loadCurrent.ReloadLyrics();
-            }));
+                LoadCurrentTrackLyrics()
+            ));
             return list;
+        }
+
+        public int OnDockablePanelCreated(Control panel)
+        {
+            panel.Controls.Add(_lyricsViewControl);
+            _lyricsViewControl.Dock = DockStyle.Fill;
+            return 0;
         }
 
         private void panel_Paint(object sender, PaintEventArgs e)
