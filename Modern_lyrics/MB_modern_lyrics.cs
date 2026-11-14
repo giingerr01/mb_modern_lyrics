@@ -18,8 +18,8 @@ namespace MusicBeePlugin
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
             about.PluginInfoVersion = PluginInfoVersion;
-            about.Name = "MB Modern Lyrics";
-            about.Description = "A MusicBee plugin for modern lyrics.";
+            about.Name = "MB Enhanced Lyrics Panel";
+            about.Description = "A MusicBee plugin word by word lyrics parser.";
             about.Author = "giingerr01";
             about.TargetApplication = "";   //  the name of a Plugin Storage device or panel header for a dockable panel
             about.Type = PluginType.General;
