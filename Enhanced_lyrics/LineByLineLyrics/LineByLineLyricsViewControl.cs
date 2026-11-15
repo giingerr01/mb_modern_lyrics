@@ -48,7 +48,7 @@ namespace MusicBeePlugin
         private void IntializeFonts()
         {
             _activeFont = new Font("Segoe UI", _fontSize, FontStyle.Bold);
-            _inactiveFont = new Font("Segoe UI", Math.Max(9,_fontSize - 1), FontStyle.Bold);
+            _inactiveFont = new Font("Segoe UI", Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
 
         public LyricsViewControl()
