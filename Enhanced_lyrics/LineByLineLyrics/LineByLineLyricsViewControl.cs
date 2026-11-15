@@ -10,7 +10,7 @@ namespace MusicBeePlugin
         private const int HorizontalPadding = 24;
         private const int LineGap = 1;
         private const float WheelStep = 30f;
-
+        private int _fontSize = 9;
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
 
@@ -25,8 +25,8 @@ namespace MusicBeePlugin
         private float _targetY;
         private readonly Timer _animTimer;
 
-        private readonly Font _activeFont = new Font("Segoe UI", 9f, FontStyle.Bold);
-        private readonly Font _inactiveFont = new Font("Segoe UI", 8f, FontStyle.Regular);
+        private Font _activeFont;
+        private Font _inactiveFont;
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
 
@@ -45,8 +45,15 @@ namespace MusicBeePlugin
             LineAlignment = StringAlignment.Center
         };
 
+        private void IntializeFonts()
+        {
+            _activeFont = new Font("Segoe UI", _fontSize, FontStyle.Bold);
+            _inactiveFont = new Font("Segoe UI", Math.Max(9,_fontSize - 1), FontStyle.Bold);
+        }
+
         public LyricsViewControl()
         {
+            IntializeFonts();
             SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |
                      ControlStyles.OptimizedDoubleBuffer |
