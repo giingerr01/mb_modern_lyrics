@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -34,7 +34,7 @@ namespace MusicBeePlugin
                 return result;
             }
 
-            var lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).Where(line => !string.IsNullOrWhiteSpace(line)).Select(line => line.Trim());
+            string[] lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
             var plainLines = new List<string>();
 
             foreach (string line in lines)

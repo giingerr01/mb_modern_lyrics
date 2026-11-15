@@ -8,8 +8,8 @@ namespace MusicBeePlugin
     public class LyricsViewControl : UserControl
     {
         private const int HorizontalPadding = 24;
-        private const int LineGap = 14;
-        private const float WheelStep = 60f;
+        private const int LineGap = 1;
+        private const float WheelStep = 30f;
 
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
@@ -25,8 +25,8 @@ namespace MusicBeePlugin
         private float _targetY;
         private readonly Timer _animTimer;
 
-        private readonly Font _activeFont = new Font("Segoe UI", 16f, FontStyle.Bold);
-        private readonly Font _inactiveFont = new Font("Segoe UI", 16f, FontStyle.Regular);
+        private readonly Font _activeFont = new Font("Segoe UI", 9f, FontStyle.Bold);
+        private readonly Font _inactiveFont = new Font("Segoe UI", 8f, FontStyle.Regular);
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
 
@@ -169,7 +169,7 @@ namespace MusicBeePlugin
             }
 
             int i = Math.Max(_currentIndex, 0);
-            return _tops[i] + _heights[i] / 2f - ClientSize.Height / 2f;
+            return ClampScroll(_tops[i] + _heights[i] / 2f - ClientSize.Height / 2f);
         }
 
         private void AnimTimer_Tick(object sender, EventArgs e)
