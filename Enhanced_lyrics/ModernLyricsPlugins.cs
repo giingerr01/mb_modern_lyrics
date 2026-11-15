@@ -38,7 +38,6 @@ namespace MusicBeePlugin
             return about;
         }
 
-
         public bool Configure(IntPtr panelHandle)
         {
             System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
@@ -54,40 +53,6 @@ namespace MusicBeePlugin
             return false;
         }
 
-        private void ApplySkinColors()
-        {
-            if (_lyricsViewControl != null && !_lyricsViewControl.IsDisposed)
-            {
-                return;
-            }
-            Color bgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentBackground));
-            Color fgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentForeground));
-            // Color highlightColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateModified, ElementComponent.ComponentForeground));
-
-            _lyricsViewControl.BackColor = bgColor;
-            _lyricsViewControl.ForeColor = fgColor;
-            // _lyricsViewControl.highlightColor = highlightColor;
-            _lyricsViewControl.Invalidate();
-        }
-
-        public void SaveSettings()
-        {
-        }
-
-        public void Close(PluginCloseReason reason)
-        {
-            if (_positionTimer != null)
-            {
-                _positionTimer.Stop();
-                _positionTimer.Dispose();
-            }
-            _lyricsViewControl?.Dispose();
-        }
-
-        public void Uninstall()
-        {
-        }
-
         // presence of this method tells MusicBee the plugin has a dockable panel
         public int OnDockablePanelCreated(Control panel)
         {
@@ -95,7 +60,6 @@ namespace MusicBeePlugin
             {
                 return 0;
             }
-
 
             //these three lines has caused me so much problem
             if (panel.InvokeRequired)
@@ -132,17 +96,20 @@ namespace MusicBeePlugin
             return 0;   // < 0: resizable, fills the space the panel is docked to
         }
 
-        private void RunOnUiThreadYouMf(Action action)
+        private void ApplySkinColors()
         {
-            Control uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
-            if (uiControl != null && uiControl.InvokeRequired)
+            if (_lyricsViewControl != null && !_lyricsViewControl.IsDisposed)
             {
-                uiControl.BeginInvoke(action);
+                return;
             }
-            else
-            {
-                action();
-            }
+            Color bgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentBackground));
+            Color fgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateDefault, ElementComponent.ComponentForeground));
+            // Color highlightColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(SkinElement.SkinInputPanel, ElementState.ElementStateModified, ElementComponent.ComponentForeground));
+
+            _lyricsViewControl.BackColor = bgColor;
+            _lyricsViewControl.ForeColor = fgColor;
+            // _lyricsViewControl.highlightColor = highlightColor;
+            _lyricsViewControl.Invalidate();
         }
 
         public void ReceiveNotification(string sourceFileUrl, NotificationType type)
@@ -256,6 +223,28 @@ namespace MusicBeePlugin
                 SyncPosition();
             }
         }
+        public void Close(PluginCloseReason reason)
+        {
+            if (_positionTimer != null)
+            {
+                _positionTimer.Stop();
+                _positionTimer.Dispose();
+            }
+            _lyricsViewControl?.Dispose();
+        }
+
+        private void RunOnUiThreadYouMf(Action action)
+        {
+            Control uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
+            if (uiControl != null && uiControl.InvokeRequired)
+            {
+                uiControl.BeginInvoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
 
         public List<ToolStripItem> GetHeaderMenuItems()
         {
@@ -263,5 +252,14 @@ namespace MusicBeePlugin
             list.Add(new ToolStripMenuItem("Reload Lyrics", null, (s, e) => LoadCurrentTrackLyrics()));
             return list;
         }
+        public void Uninstall()
+        {
+        }
+        public void SaveSettings()
+        {
+        }
+
+
+
     }
 }
