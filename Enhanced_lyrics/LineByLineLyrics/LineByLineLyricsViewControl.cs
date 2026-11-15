@@ -25,10 +25,10 @@ namespace MusicBeePlugin
         private float _targetY;
         private readonly Timer _animTimer;
 
-        private readonly Font _activeFont = new Font("Segoe UI", 16F, FontStyle.Bold);
-        private readonly Font _inactiveFont = new Font("Segoe UI", 16F, FontStyle.Regular);
-        private readonly SolidBrush _activeBrush = new SolidBrush(Color.White);
-        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.Blue);
+        private readonly Font _activeFont = new Font("Segoe UI", 16f, FontStyle.Bold);
+        private readonly Font _inactiveFont = new Font("Segoe UI", 16f, FontStyle.Regular);
+        private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
+        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -51,7 +51,7 @@ namespace MusicBeePlugin
                      ControlStyles.UserPaint |
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
-            BackColor = Color.FromArgb(20, 20, 20);
+            BackColor = Color.FromArgb(255, 255, 255);
 
             _animTimer = new Timer { Interval = 15 };
             _animTimer.Tick += AnimTimer_Tick;
