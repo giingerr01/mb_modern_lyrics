@@ -10,7 +10,7 @@ namespace MusicBeePlugin
         private const int HorizontalPadding = 24;
         private const int LineGap = 1;
         private const float WheelStep = 30f;
-        private int _fontSize = 9;
+        private readonly int _fontSize = 9;
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
 
