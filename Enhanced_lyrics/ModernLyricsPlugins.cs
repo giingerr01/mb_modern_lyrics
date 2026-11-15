@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using MusicBeePlugin.Enhanced_lyrics.LineByLineLyrics.Settings;
 
 namespace MusicBeePlugin
 {
@@ -40,17 +41,21 @@ namespace MusicBeePlugin
 
         public bool Configure(IntPtr panelHandle)
         {
-            System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-            if (panelHandle != IntPtr.Zero)
+            // System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+
+            using (SettingsPanel settingsPanel = new SettingsPanel(
+                9,
+                SaveSettings
+            ))
             {
-                Panel configPanel = (Panel)Control.FromHandle(panelHandle);
-                Label prompt = new Label();
-                prompt.AutoSize = true;
-                prompt.Location = new Point(0, 0);
-                prompt.Text = "Coming soon: configuration options for the LRC Lyrics Panel plugin.";
-                configPanel.Controls.Add(prompt);
+                if (settingsPanel.ShowDialog() == DialogResult.OK)
+                {
+
+                }
             }
-            return false;
+            {
+                return false;
+            }
         }
 
         // presence of this method tells MusicBee the plugin has a dockable panel
