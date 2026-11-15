@@ -1,4 +1,4 @@
-﻿namespace MusicBeePlugin.Enhanced_lyrics.LineByLineLyrics.Settings
+﻿namespace MusicBeePlugin
 {
     partial class SettingsPanel
     {
@@ -39,7 +39,6 @@
             this.fontSizeBox.Name = "fontSizeBox";
             this.fontSizeBox.Size = new System.Drawing.Size(124, 20);
             this.fontSizeBox.TabIndex = 0;
-            this.fontSizeBox.TextChanged += new System.EventHandler(this.FontSizeBox_TextChanged);
             // 
             // saveButton
             // 

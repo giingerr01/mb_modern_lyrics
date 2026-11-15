@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace MusicBeePlugin.Enhanced_lyrics.LineByLineLyrics.Settings
+namespace MusicBeePlugin
 {
     public partial class SettingsPanel : UserControl
     {
-        private int _fontSize;
         private readonly Action _saveSettings;
+
+        public int FontSize { get; private set; }
 
         public SettingsPanel(
             int fontSize,
@@ -21,21 +15,20 @@ namespace MusicBeePlugin.Enhanced_lyrics.LineByLineLyrics.Settings
         )
         {
             InitializeComponent();
-            _fontSize = fontSize;
+            FontSize = fontSize;
             _saveSettings = saveSettings ?? throw new ArgumentNullException(nameof(saveSettings));
-            fontSizeBox.Text = fontSize.ToString();
-        }
-
-        private void FontSizeBox_TextChanged(object sender, EventArgs e)
-        {
-            if (int.TryParse(fontSizeBox.Text, out int newFontSize))
-            {
-                _fontSize = newFontSize;
-            }
+            fontSizeBox.Text = FontSize.ToString();
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
         {
+            if (!int.TryParse(fontSizeBox.Text, out int fontSize) || fontSize < 1)
+            {
+                MessageBox.Show("Enter a font size greater than zero.");
+                return;
+            }
+
+            FontSize = fontSize;
             _saveSettings();
         }
     }
