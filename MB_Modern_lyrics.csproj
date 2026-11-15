@@ -83,7 +83,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\LineByLineLyricsParser.cs" />
-    <Compile Include="Enhanced_lyrics\LineByLineLyrics\LineByLineLyricsViewControl.cs" />
+    <Compile Include="Enhanced_lyrics\LineByLineLyrics\LineByLineLyricsViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Models\LineByLineLyricsModels.cs" />
     <Compile Include="Enhanced_lyrics\ModernLyricsPlugins.cs" />
     <Compile Include="MusicBeeInterface.cs" />
