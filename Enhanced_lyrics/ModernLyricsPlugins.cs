@@ -43,12 +43,6 @@ namespace MusicBeePlugin
             // System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             if (panelHandle != IntPtr.Zero)
             {
-                Panel configPanel = (Panel)Control.FromHandle(panelHandle);
-                SettingsPanel settingsPanel = new SettingsPanel(9, SaveSettings)
-                {
-                    Dock = DockStyle.Fill
-                };
-                configPanel.Controls.Add(settingsPanel);
             }
             return false;
         }

@@ -27,6 +27,8 @@ namespace MusicBeePlugin
 
         private Font _activeFont;
         private Font _inactiveFont;
+
+
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
 
@@ -47,17 +49,19 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            _activeFont = new Font("Segoe UI", _fontSize, FontStyle.Bold);
-            _inactiveFont = new Font("Segoe UI", Math.Max(9, _fontSize - 1), FontStyle.Bold);
+            string font = "Segoe UI";
+            _activeFont = new Font(font, _fontSize, FontStyle.Bold);
+            _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
 
         public LyricsViewControl()
         {
             IntializeFonts();
-            SetStyle(ControlStyles.AllPaintingInWmPaint |
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
+            this.UpdateStyles();
             BackColor = Color.FromArgb(255, 255, 255);
 
             _animTimer = new Timer { Interval = 15 };
@@ -226,7 +230,7 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAlias;   // smoother while scrolling than GridFit
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;   // smoother while scrolling than GridFit
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
