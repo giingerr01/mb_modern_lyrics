@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace MusicBeePlugin
 {
-    // Standard line-by-line LRC:
+    // Standard line-by-line LRC
     //   [ar:Artist] [ti:Title] [offset:+500]
     //   [00:12.00]First line
     //   [00:15.50][01:05.20]Line that repeats
@@ -34,7 +34,7 @@ namespace MusicBeePlugin
                 return result;
             }
 
-            string[] lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).Where(line => !string.IsNullOrWhiteSpace(line)).Select(line => line.Trim());
             var plainLines = new List<string>();
 
             foreach (string line in lines)
