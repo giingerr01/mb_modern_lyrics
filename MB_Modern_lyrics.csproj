@@ -88,7 +88,7 @@
     </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Models\LineByLineLyricsModels.cs" />
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Settings\SettingsPanel.cs">
-      <SubType>Form</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Settings\SettingsPanel.Designer.cs">
       <DependentUpon>SettingsPanel.cs</DependentUpon>
@@ -122,6 +122,7 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="Enhanced_lyrics\LineByLineLyrics\Settings\SettingsPanel.resx">
       <DependentUpon>SettingsPanel.cs</DependentUpon>
