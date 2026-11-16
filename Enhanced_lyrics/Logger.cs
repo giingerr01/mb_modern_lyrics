@@ -10,7 +10,10 @@ namespace MusicBeePlugin
 
         public static void Log(string message)
         {
-            if (FilePath == null) return;
+            if (FilePath == null)
+            {
+                return;
+            }
 
             try
             {

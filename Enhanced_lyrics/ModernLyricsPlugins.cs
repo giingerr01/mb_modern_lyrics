@@ -8,9 +8,7 @@ using System.IO;
 using System.Globalization;
 using System.Windows.Forms;
 using MusicBeePlugin.Enhanced_lyrics;
-using System.Configuration;
-using System.Data.SqlClient;
-using Microsoft.SqlServer.Server;
+using System.Linq.Expressions;
 
 namespace MusicBeePlugin
 {
@@ -30,11 +28,11 @@ namespace MusicBeePlugin
 
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
-
-
+        private Color _activeColor = Color.Black;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
+            Logger.Log("Plugin Intialized!");
             System.Diagnostics.Debug.WriteLine("<Inialize()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
@@ -56,17 +54,15 @@ namespace MusicBeePlugin
                 {
                     settingsJson = new JObject();
                     Logger.Log("Error while reading: " + ex.Message);
-
                 }
             }
+
+            Logger.FilePath = Path.Combine(LRCSettingsFolder, "LrcSettingsLog.log");
+
+
             JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject
             ?? new JObject();
-
             Settings = lyricsSettings;
-
-            _fontSize = Settings.Value<int?>("FontSize") ?? 10;
-            _font = Settings.Value<string>("Font") ?? "Lucida sans";
-
             LoadSettings();
             about.PluginInfoVersion = 1;
             about.Name = "LRC Lyrics Panel";
@@ -113,12 +109,16 @@ namespace MusicBeePlugin
 
             JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject ?? new JObject();
 
+            // property to be saved
             lyricsSettings["FontSize"] = _fontSize;
             lyricsSettings["Font"] = _font;
+            lyricsSettings["ActiveColor"] = ColorTranslator.ToHtml(_activeColor);
+
+            settingsJson["Lyrics-Settings"] = lyricsSettings;
 
             File.WriteAllText(jsonFilePath, settingsJson.ToString(Formatting.Indented));
 
-            //log error
+            //log success
             Logger.Log("Settings Saved!! IN Settings FIle");
         }
 
@@ -162,9 +162,13 @@ namespace MusicBeePlugin
 
             lrcSettings.ActiveColorChanged += color =>
             {
+                _activeColor = color;
+                SaveSettings();
+
                 RunOnUiThreadYouMf(() =>
                 {
                     _lyricsViewControl?.SetActiveColor(color);
+                    SaveSettings();
                 });
             };
 
@@ -200,6 +204,8 @@ namespace MusicBeePlugin
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
 
             _lyricsViewControl.SetFontSize(_fontSize, _font);
+
+            _lyricsViewControl.SetActiveColor(_activeColor);
 
             _lyricsViewControl.SetLyrics(_currentLyrics);
 
@@ -250,11 +256,25 @@ namespace MusicBeePlugin
             string rawLyrics = mbApiInterface.NowPlaying_GetLyrics();
             if (string.IsNullOrWhiteSpace(rawLyrics))
             {
-                rawLyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
+                try
+                {
+                    rawLyrics = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Lyrics);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error Getting Lyrics from Trackfile: " + ex.Message);
+                }
             }
             if (string.IsNullOrWhiteSpace(rawLyrics))
             {
-                rawLyrics = ReadSidecarLrc();
+                try
+                {
+                    rawLyrics = ReadSidecarLrc();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Reading LRC file failed: " + ex.Message);
+                }
             }
 
             _currentLyrics = LrcParser.Parse(rawLyrics);
@@ -281,8 +301,9 @@ namespace MusicBeePlugin
                 string lrcPath = Path.ChangeExtension(url, ".lrc");
                 return File.Exists(lrcPath) ? File.ReadAllText(lrcPath) : null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Logger.Log("Reading LRC file Failed: " + ex.Message);
                 return null;
             }
         }
@@ -366,22 +387,24 @@ namespace MusicBeePlugin
 
         private void LoadSettings()
         {
+            _fontSize = Settings.Value<int?>("FontSize") ?? 10;
+            _font = Settings.Value<string>("Font") ?? "Lucida sans";
+
+            string savedColor = Settings.Value<string>("ActiveColor");
+            if (!string.IsNullOrEmpty(savedColor))
+            {
+                try
+                {
+                    _activeColor = ColorTranslator.FromHtml(savedColor);
+                    Logger.Log("Color Successfully got!!");
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error Loading active color: " + ex.Message);
+                    _activeColor = Color.Black;
+                }
+            }
+
         }
-
-        // private bool SettingsStrage(out string settingsPath)
-        // {
-        //     string storagePath = mbApiInterface.Setting_GetPersistentStoragePath();
-        //     if (string.IsNullOrWhiteSpace(storagePath))
-        //     {
-        //         mbApiInterface.MB_Trace("MusicBee did not provide a settings storage path.");
-        //         settingsPath = null;
-        //         return false;
-        //     }
-
-        //     settingsPath = Path.Combine(storagePath, FontSizeSettingsFileName);
-        //     return true;
-        // }
-
-
     }
 }
