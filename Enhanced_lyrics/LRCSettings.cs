@@ -52,6 +52,11 @@ namespace MusicBeePlugin.Enhanced_lyrics
             }
 
         }
- 
+
+        private void fontSizeBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
