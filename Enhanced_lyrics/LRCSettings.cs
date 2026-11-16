@@ -10,6 +10,11 @@ using System.Windows.Forms;
 
 namespace MusicBeePlugin.Enhanced_lyrics
 {
+
+    // Color backGroundColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
+    // SkinElement.SkinInputPanel,
+    //         ElementState.ElementStateDefault,
+    //         ElementComponent.ComponentBackground));
     public partial class LRCSettings : UserControl
     {
         private String _font = "Lucida Sans";
@@ -18,9 +23,15 @@ namespace MusicBeePlugin.Enhanced_lyrics
         public event Action<string, int> FontSelectionChanged;
         public event Action<Color> ActiveColorChanged;
 
-        public LRCSettings(string font, int fontSize)
+
+        public LRCSettings(string font, int fontSize, Color bgColor)
         {
             InitializeComponent();
+            this.BackColor = bgColor;
+            LyricsLabel.BackColor = Color.Transparent;
+            fontSizeBox.BackColor = bgColor;
+            CustomColorCheckBox.UseVisualStyleBackColor = false;
+            CustomColorCheckBox.BackColor = bgColor;
             _font = font;
             _fontSize = fontSize;
             fontSizeBox.Text = $"{_font}, {_fontSize}pt";
