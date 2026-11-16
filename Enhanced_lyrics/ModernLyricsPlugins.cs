@@ -83,6 +83,14 @@ namespace MusicBeePlugin
                 });
             };
 
+            lrcSettings.ActiveColorChanged += color =>
+            {
+                RunOnUiThreadYouMf(() =>
+                {
+                    _lyricsViewControl?.SetActiveColor(color);
+                });
+            };
+
             configPanel.Controls.Add(lrcSettings);
 
             return false;
