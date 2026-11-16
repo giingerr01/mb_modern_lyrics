@@ -166,7 +166,8 @@ namespace MusicBeePlugin
 
         private float ClampScroll(float value)
         {
-            return Math.Max(0, Math.Min(MaxScroll(), value));
+            // -10 is to the gap size between the firs line of lyircs from the celieng of the LRC panle
+            return Math.Max(-10, Math.Min(MaxScroll(), value));
         }
 
         // synced: keeping the active line ahh...vericallly in center and unsynced lyrics keep the current clapmped target
@@ -178,6 +179,7 @@ namespace MusicBeePlugin
             }
 
             int i = Math.Max(_currentIndex, 0);
+            /// clamp the top line so the top part doesnt show show blacnk Panle 
             return ClampScroll(_tops[i] + _heights[i] / 2f - ClientSize.Height / 2f);
         }
 
@@ -205,7 +207,7 @@ namespace MusicBeePlugin
             }
         }
 
-        // unsynchronized lyrics can be scrolled manually
+        // unsynced lyrics can be scrolled manually
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
@@ -228,7 +230,8 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;   // smoother while scrolling than GridFit
+            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            // use gridfit so it can render text with sharp clarity it does comes with a tradeoff in perfomace of smoothness of the lyrics scrolling
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
