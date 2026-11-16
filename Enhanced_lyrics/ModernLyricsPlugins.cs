@@ -1,9 +1,11 @@
-﻿using System;
+﻿//ModernLyricsPlugin.cs
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Globalization;
 using System.Windows.Forms;
+using MusicBeePlugin.Enhanced_lyrics;
 
 namespace MusicBeePlugin
 {
@@ -14,11 +16,12 @@ namespace MusicBeePlugin
 
         private LyricsViewControl _lyricsViewControl;
         private Control _dockablePanel;
-        // private LRCSettings lrcSettings;
+        private LRCSettings lrcSettings;
         private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
 
         private int _fontSize = 10;
+        private string _font = "Lucida Sans";
 
         private const string FontSizeSettingsFileName = "lyrics-font-size.txt";
 
@@ -52,16 +55,37 @@ namespace MusicBeePlugin
                 return false;
             }
 
-            //     Control configPanel = Control.FromHandle(panelHandle);
-            //     if (configPanel == null)
-            //     {
-            //         return false;
-            //     }
+            Control configPanel = Control.FromHandle(panelHandle);
+            if (configPanel == null)
+            {
+                return false;
+            }
 
             configPanel.Controls.Clear();
-            //     lrcSettings = new LRCSettings(_fontSize) { Dock = DockStyle.Fill };
-            //     configPanel.Controls.Add(lrcSettings);
-            //     return false;
+
+            lrcSettings = new LRCSettings(_font, _fontSize)
+            {
+                Dock = DockStyle.Fill
+            };
+
+            System.Diagnostics.Debug.WriteLine(
+                $"LRCSettings null: {lrcSettings == null}");
+
+
+            lrcSettings.FontSelectionChanged += (font, size) =>
+            {
+                _font = font;
+                _fontSize = size;
+
+                RunOnUiThreadYouMf(() =>
+                {
+                    _lyricsViewControl?.SetFontSize(_fontSize, _font);
+                });
+            };
+
+            configPanel.Controls.Add(lrcSettings);
+
+            return false;
         }
 
         // presence of this method tells MusicBee the plugin has a dockable panel
@@ -87,8 +111,13 @@ namespace MusicBeePlugin
                 _positionTimer.Elapsed += PositionTimer_Elapsed;
             }
             _lyricsViewControl?.Dispose();
+
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
+
+            _lyricsViewControl.SetFontSize(_fontSize, _font);
+
             _lyricsViewControl.SetLyrics(_currentLyrics);
+
             panel.Controls.Add(_lyricsViewControl);
 
             //makeing  sure that the lyrics are loaded even if plugin startup fired bfore panel creating
