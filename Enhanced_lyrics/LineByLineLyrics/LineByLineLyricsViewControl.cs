@@ -25,6 +25,8 @@ namespace MusicBeePlugin
 
         private Font _activeFont;
         private Font _inactiveFont;
+
+        private string font = "Lucida Sans";
         private readonly int _fontSize = 10;
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
@@ -47,7 +49,6 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            string font = "JetBrains Mono Nerd";
             _activeFont = new Font(font, _fontSize, FontStyle.Bold);
             _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
@@ -166,7 +167,7 @@ namespace MusicBeePlugin
 
         private float ClampScroll(float value)
         {
-            return Math.Max(0, Math.Min(MaxScroll(), value));
+            return Math.Max(-8, Math.Min(MaxScroll(), value));
         }
 
         // synced: keeping the active line ahh...vericallly in center and unsynced lyrics keep the current clapmped target
