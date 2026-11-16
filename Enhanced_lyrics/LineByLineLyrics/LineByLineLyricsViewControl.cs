@@ -31,6 +31,7 @@ namespace MusicBeePlugin
 
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.WhiteSmoke;
+        private Color _backColor = Color.White;
 
         private SolidBrush _activeBrush;
         private SolidBrush _inactiveBrush;
@@ -58,9 +59,11 @@ namespace MusicBeePlugin
 
         public void SetActiveColor(Color color)
         {
-            _activeColor = color;
-            _activeBrush.Dispose();
-            _activeBrush = new SolidBrush(_activeColor);
+            {
+                _activeColor = color;
+                _activeBrush.Dispose();
+                _activeBrush = new SolidBrush(_activeColor);
+            }
             Invalidate();
         }
 
@@ -75,7 +78,7 @@ namespace MusicBeePlugin
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
             this.UpdateStyles();
-            BackColor = Color.FromArgb(255, 255, 255);
+            BackColor = _backColor;
 
             _animTimer = new Timer { Interval = 15 };
             _animTimer.Tick += AnimTimer_Tick;
