@@ -49,7 +49,7 @@
             // 
             this.fontSizeBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fontSizeBox.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.fontSizeBox.Location = new System.Drawing.Point(82, 30);
+            this.fontSizeBox.Location = new System.Drawing.Point(82, 24);
             this.fontSizeBox.Name = "fontSizeBox";
             this.fontSizeBox.ReadOnly = true;
             this.fontSizeBox.Size = new System.Drawing.Size(178, 20);
@@ -62,7 +62,7 @@
             this.CustomColorCheckBox.Font = new System.Drawing.Font("JetBrainsMono NFM", 8.249999F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CustomColorCheckBox.Location = new System.Drawing.Point(82, 0);
             this.CustomColorCheckBox.Name = "CustomColorCheckBox";
-            this.CustomColorCheckBox.Size = new System.Drawing.Size(243, 18);
+            this.CustomColorCheckBox.Size = new System.Drawing.Size(257, 18);
             this.CustomColorCheckBox.TabIndex = 3;
             this.CustomColorCheckBox.Text = "custom color for highlighted text";
             this.CustomColorCheckBox.UseVisualStyleBackColor = true;
@@ -78,7 +78,7 @@
             this.Controls.Add(this.fontSizeBox);
             this.Controls.Add(this.LyricsLabel);
             this.Name = "LRCSettings";
-            this.Size = new System.Drawing.Size(575, 289);
+            this.Size = new System.Drawing.Size(575, 194);
             this.Load += new System.EventHandler(this.LRCSettings_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
