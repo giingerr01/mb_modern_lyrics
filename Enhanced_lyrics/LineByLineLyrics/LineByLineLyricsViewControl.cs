@@ -25,7 +25,7 @@ namespace MusicBeePlugin
 
         private Font _activeFont;
         private Font _inactiveFont;
-        private readonly int _fontSize = 10;
+        private int _fontSize = 10;
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
@@ -72,6 +72,27 @@ namespace MusicBeePlugin
             _currentIndex = -1;
             _scrollY = 0;
             _targetY = 0;
+            _layoutDirty = true;
+            _animTimer.Stop();
+            Invalidate();
+        }
+
+        public void SetFontSize(int fontSize)
+        {
+            if (fontSize < 8 || fontSize > 72)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fontSize));
+            }
+
+            if (_fontSize == fontSize)
+            {
+                return;
+            }
+
+            _fontSize = fontSize;
+            _activeFont.Dispose();
+            _inactiveFont.Dispose();
+            IntializeFonts();
             _layoutDirty = true;
             _animTimer.Stop();
             Invalidate();
