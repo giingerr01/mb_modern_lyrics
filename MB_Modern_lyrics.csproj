@@ -97,6 +97,7 @@
       <DependentUpon>LRCSettings.cs</DependentUpon>
     </Compile>
     <Compile Include="Enhanced_lyrics\ModernLyricsPlugins.cs" />
+    <Compile Include="Enhanced_lyrics\Logger.cs" />
     <Compile Include="MusicBeeInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
