@@ -61,9 +61,7 @@ namespace MusicBeePlugin
             _activeColor = color;
             _activeBrush.Dispose();
             _activeBrush = new SolidBrush(_activeColor);
-
             Invalidate();
-
         }
 
         public LyricsViewControl()
@@ -221,6 +219,10 @@ namespace MusicBeePlugin
             }
 
             int i = Math.Max(_currentIndex, 0);
+
+            /// its been crazy here chattth puja is almost ending and here i am doing nothing and writeing this useless plugin
+            //  dekhthe hai kya hota h
+
             /// clamp the top line so the top part doesnt show show blacnk Panle 
             return ClampScroll(_tops[i] + _heights[i] / 2f - ClientSize.Height / 2f);
         }
