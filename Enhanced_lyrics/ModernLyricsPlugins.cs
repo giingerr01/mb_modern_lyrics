@@ -4,7 +4,6 @@ using System.Drawing;
 using System.IO;
 using System.Globalization;
 using System.Windows.Forms;
-using MusicBeePlugin.Enhanced_lyrics;
 
 namespace MusicBeePlugin
 {
@@ -15,7 +14,7 @@ namespace MusicBeePlugin
 
         private LyricsViewControl _lyricsViewControl;
         private Control _dockablePanel;
-        private SettingsPanel _settingsPanel;
+        private LRCSettings lrcSettings;
         private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
         private int _fontSize = 10;
@@ -59,8 +58,8 @@ namespace MusicBeePlugin
             }
 
             configPanel.Controls.Clear();
-            _settingsPanel = new SettingsPanel(_fontSize) { Dock = DockStyle.Fill };
-            configPanel.Controls.Add(_settingsPanel);
+            lrcSettings = new LRCSettings(_fontSize) { Dock = DockStyle.Fill };
+            configPanel.Controls.Add(lrcSettings);
             return false;
         }
 
@@ -251,9 +250,9 @@ namespace MusicBeePlugin
         }
         public void SaveSettings()
         {
-            if (_settingsPanel != null)
+            if (lrcSettings != null)
             {
-                _fontSize = _settingsPanel.FontSize;
+                _fontSize = lrcSettings.FontSize;
                 _lyricsViewControl?.SetFontSize(_fontSize);
             }
 
