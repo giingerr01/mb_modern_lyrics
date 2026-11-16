@@ -66,7 +66,7 @@ namespace MusicBeePlugin
             Settings = lyricsSettings;
             LoadSettings();
             about.PluginInfoVersion = 1;
-            about.Name = "LRC Lyrics Panel";
+            about.Name = "LRC Lyrics";
             about.Description = "Line-by-line synchronized (LRC) lyrics panel.";
             about.Author = "giingerr01";
             about.TargetApplication = "LRC Lyrics";
