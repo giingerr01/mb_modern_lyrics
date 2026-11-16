@@ -15,8 +15,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private String _font = "Lucida Sans";
         private int _fontSize = 10;
         private Color _activeColor = Color.Black;
-        public event Action <string, int> FontSelectionChanged;
-        public event Action <Color> ActiveColorChanged;
+        public event Action<string, int> FontSelectionChanged;
+        public event Action<Color> ActiveColorChanged;
 
         public LRCSettings(string font, int fontSize)
         {
@@ -36,7 +36,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         }
 
-       private void FontSelctor_Click(object sender, EventArgs e)
+        private void FontSelctor_Click(object sender, EventArgs e)
         {
             using (FontDialog fontDialog = new FontDialog())
             {
@@ -54,7 +54,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         }
 
-        private void fontSizeBox_TextChanged(object sender, EventArgs e)
+        private void FontSizeBox_TextChanged(object sender, EventArgs e)
         {
 
         }
@@ -71,12 +71,12 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     if (colorDialog.ShowDialog() == DialogResult.OK)
                     {
                         _activeColor = colorDialog.Color;
-                        ActiveColorChanged?.Invoke(_activeColor); 
+                        ActiveColorChanged?.Invoke(_activeColor);
                     }
                     else
                     {
                         CustomColorCheckBox.Checked = false;
-                            
+
                     }
                 }
             }

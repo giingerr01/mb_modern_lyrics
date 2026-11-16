@@ -2,19 +2,27 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Globalization;
 using System.Windows.Forms;
 using MusicBeePlugin.Enhanced_lyrics;
+using System.Configuration;
+using System.Data.SqlClient;
+using Microsoft.SqlServer.Server;
 
 namespace MusicBeePlugin
 {
     public partial class Plugin
     {
+
+
         private MusicBeeApiInterface mbApiInterface;
         private PluginInfo about = new PluginInfo();
 
         private LyricsViewControl _lyricsViewControl;
+        private JObject Settings { get; set; } = new JObject();
         private Control _dockablePanel;
         private LRCSettings lrcSettings;
         private System.Timers.Timer _positionTimer;
@@ -23,13 +31,42 @@ namespace MusicBeePlugin
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
 
-        private const string FontSizeSettingsFileName = "lyrics-font-size.txt";
+
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
             System.Diagnostics.Debug.WriteLine("<Inialize()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
+
+            // storage
+            string settingsPath = mbApiInterface.Setting_GetPersistentStoragePath();
+            string LRCSettingsFolder = Path.Combine(settingsPath, "LrcSettings");
+            Directory.CreateDirectory(LRCSettingsFolder);
+
+            string jsonFilePath = Path.Combine(LRCSettingsFolder, "LrcSettings.json");
+            JObject settingsJson = new JObject();
+            if (File.Exists(jsonFilePath))
+            {
+                try
+                {
+                    settingsJson = JObject.Parse(File.ReadAllText(jsonFilePath));
+                }
+                catch (Exception ex)
+                {
+                    settingsJson = new JObject();
+                    Logger.Log("Error while reading: " + ex.Message);
+
+                }
+            }
+            JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject
+            ?? new JObject();
+
+            Settings = lyricsSettings;
+
+            _fontSize = Settings.Value<int?>("FontSize") ?? 10;
+            _font = Settings.Value<string>("Font") ?? "Lucida sans";
+
             LoadSettings();
             about.PluginInfoVersion = 1;
             about.Name = "LRC Lyrics Panel";
@@ -47,6 +84,44 @@ namespace MusicBeePlugin
 
             return about;
         }
+
+        public void SaveSettings()
+        {
+            // Settings["FontSize"] = _fontSize;
+            // Settings["Font"] = _font;
+
+            string settingsPath = mbApiInterface.Setting_GetPersistentStoragePath();
+            string LRCSettingsFolder = Path.Combine(settingsPath, "LrcSettings");
+            Directory.CreateDirectory(LRCSettingsFolder);
+
+            string jsonFilePath = Path.Combine(LRCSettingsFolder, "LrcSettings.json");
+
+            JObject settingsJson = new JObject();
+
+            if (File.Exists(jsonFilePath))
+            {
+                try
+                {
+                    settingsJson = JObject.Parse(File.ReadAllText(jsonFilePath));
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error reading settings: " + ex.Message);
+
+                }
+            }
+
+            JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject ?? new JObject();
+
+            lyricsSettings["FontSize"] = _fontSize;
+            lyricsSettings["Font"] = _font;
+
+            File.WriteAllText(jsonFilePath, settingsJson.ToString(Formatting.Indented));
+
+            //log error
+            Logger.Log("Settings Saved!! IN Settings FIle");
+        }
+
 
         public bool Configure(IntPtr panelHandle)
         {
@@ -76,6 +151,8 @@ namespace MusicBeePlugin
             {
                 _font = font;
                 _fontSize = size;
+
+                SaveSettings();
 
                 RunOnUiThreadYouMf(() =>
                 {
@@ -286,27 +363,24 @@ namespace MusicBeePlugin
         public void Uninstall()
         {
         }
-        public void SaveSettings()
-        {
-        }
 
         private void LoadSettings()
         {
         }
 
-        private bool TryGetFontSizeSettingsPath(out string settingsPath)
-        {
-            string storagePath = mbApiInterface.Setting_GetPersistentStoragePath();
-            if (string.IsNullOrWhiteSpace(storagePath))
-            {
-                mbApiInterface.MB_Trace("MusicBee did not provide a settings storage path.");
-                settingsPath = null;
-                return false;
-            }
+        // private bool SettingsStrage(out string settingsPath)
+        // {
+        //     string storagePath = mbApiInterface.Setting_GetPersistentStoragePath();
+        //     if (string.IsNullOrWhiteSpace(storagePath))
+        //     {
+        //         mbApiInterface.MB_Trace("MusicBee did not provide a settings storage path.");
+        //         settingsPath = null;
+        //         return false;
+        //     }
 
-            settingsPath = Path.Combine(storagePath, FontSizeSettingsFileName);
-            return true;
-        }
+        //     settingsPath = Path.Combine(storagePath, FontSizeSettingsFileName);
+        //     return true;
+        // }
 
 
     }
