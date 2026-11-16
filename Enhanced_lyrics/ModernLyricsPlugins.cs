@@ -29,6 +29,7 @@ namespace MusicBeePlugin
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
         private Color _activeColor = Color.Black;
+        private Color _bgColor = Color.White;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
@@ -80,6 +81,7 @@ namespace MusicBeePlugin
 
             return about;
         }
+
 
         public void SaveSettings()
         {
@@ -138,7 +140,8 @@ namespace MusicBeePlugin
 
             configPanel.Controls.Clear();
 
-            lrcSettings = new LRCSettings(_font, _fontSize)
+            _bgColor = GetSkinPanelBackgroundColor();
+            lrcSettings = new LRCSettings(_font, _fontSize, _bgColor)
             {
                 Dock = DockStyle.Fill
             };
@@ -203,6 +206,16 @@ namespace MusicBeePlugin
 
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
 
+            Color bgColor = GetSkinPanelBackgroundColor();
+
+            Color fgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
+                SkinElement.SkinInputPanel, ElementState.ElementStateDefault,
+                ElementComponent.ComponentForeground
+            ));
+
+            // _lyricsViewControl.SetBackgroundColor(bgColor);
+            _lyricsViewControl.BackColor = bgColor;
+
             _lyricsViewControl.SetFontSize(_fontSize, _font);
 
             _lyricsViewControl.SetActiveColor(_activeColor);
@@ -224,6 +237,14 @@ namespace MusicBeePlugin
             UpdateTimerState();
             SyncPosition();
             return 0;   // < 0: resizable, fills the space the panel is docked to
+        }
+
+        private Color GetSkinPanelBackgroundColor()
+        {
+            return Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
+                SkinElement.SkinInputPanel,
+                ElementState.ElementStateDefault,
+                ElementComponent.ComponentBackground));
         }
 
         public void ReceiveNotification(string sourceFileUrl, NotificationType type)
