@@ -10,8 +10,6 @@ namespace MusicBeePlugin
         private const int HorizontalPadding = 24;
         private const int LineGap = 1;
         private const float WheelStep = 30f;
-        private readonly int _fontSize = 9;
-        private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
 
         // layout
@@ -27,8 +25,8 @@ namespace MusicBeePlugin
 
         private Font _activeFont;
         private Font _inactiveFont;
-
-
+        private readonly int _fontSize = 10;
+        private ParsedLyrics _lyrics = new ParsedLyrics();
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
 
