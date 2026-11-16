@@ -12,10 +12,17 @@ namespace MusicBeePlugin.Enhanced_lyrics
 {
     public partial class LRCSettings : UserControl
     {
-        public LRCSettings(int FontSize)
+        private String _font = "Lucida Sans";
+        private int _fontSize = 10;
+        public event Action <string, int> FontSelectionChanged;
+
+        public LRCSettings(string font, int fontSize)
         {
             InitializeComponent();
-            fontSizeBox = FontSize;
+            _font = font;
+            _fontSize = fontSize;
+
+            fontSizeBox.Text = $"{_font}, {_fontSize}pt";
         }
 
         private void LRCSettings_Load(object sender, EventArgs e)
@@ -27,5 +34,24 @@ namespace MusicBeePlugin.Enhanced_lyrics
         {
 
         }
+
+       private void FontSelctor_Click(object sender, EventArgs e)
+        {
+            using (FontDialog fontDialog = new FontDialog())
+            {
+                fontDialog.Font = new Font(_font, _fontSize);
+
+                if (fontDialog.ShowDialog() == DialogResult.OK)
+                {
+                    _font = fontDialog.Font.Name;
+                    _fontSize = (int)fontDialog.Font.Size;
+
+                    fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+                    FontSelectionChanged?.Invoke(_font, _fontSize);
+                }
+            }
+
+        }
+ 
     }
 }
