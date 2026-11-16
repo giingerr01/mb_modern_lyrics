@@ -49,7 +49,7 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            string font = "Segoe UI";
+            string font = "JetBrains Mono Nerd";
             _activeFont = new Font(font, _fontSize, FontStyle.Bold);
             _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
@@ -230,7 +230,7 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;   // smoother while scrolling than GridFit
+            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;   // smoother while scrolling than GridFit
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
