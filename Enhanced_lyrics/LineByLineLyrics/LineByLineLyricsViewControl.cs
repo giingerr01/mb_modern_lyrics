@@ -255,7 +255,7 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit; // avoid Antialias bcz it can render text not very clean sharp
             // use gridfit so it can render text with sharp clarity it does comes with a tradeoff in perfomace of smoothness of the lyrics scrolling
             g.Clear(BackColor);
 
