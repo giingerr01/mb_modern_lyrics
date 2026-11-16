@@ -189,9 +189,16 @@ namespace MusicBeePlugin
             }
 
             //these three lines has caused me so much problem
-            if (panel.InvokeRequired)
+            try
             {
-                return (int)panel.Invoke(new Func<int>(() => OnDockablePanelCreated(panel)));
+                if (panel.InvokeRequired)
+                {
+                    return (int)panel.Invoke(new Func<int>(() => OnDockablePanelCreated(panel)));
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log("OnDockablePanel creation Failed: " + ex.Message);
             }
 
             System.Diagnostics.Debug.WriteLine("<OnDocablePanelCreated()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
