@@ -26,6 +26,7 @@ namespace MusicBeePlugin
         private Font _activeFont;
         private Font _inactiveFont;
         private int _fontSize = 10;
+        private string font = "Lucida Sans";
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
@@ -47,7 +48,6 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            string font = "JetBrains Mono Nerd";
             _activeFont = new Font(font, _fontSize, FontStyle.Bold);
             _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }

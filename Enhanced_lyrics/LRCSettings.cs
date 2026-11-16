@@ -15,6 +15,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         public LRCSettings(int FontSize)
         {
             InitializeComponent();
+            fontSizeBox = FontSize;
         }
 
         private void LRCSettings_Load(object sender, EventArgs e)

@@ -14,9 +14,10 @@ namespace MusicBeePlugin
 
         private LyricsViewControl _lyricsViewControl;
         private Control _dockablePanel;
-        private LRCSettings lrcSettings;
+        // private LRCSettings lrcSettings;
         private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
+
         private int _fontSize = 10;
 
         private const string FontSizeSettingsFileName = "lyrics-font-size.txt";
@@ -51,16 +52,16 @@ namespace MusicBeePlugin
                 return false;
             }
 
-            Control configPanel = Control.FromHandle(panelHandle);
-            if (configPanel == null)
-            {
-                return false;
-            }
+            //     Control configPanel = Control.FromHandle(panelHandle);
+            //     if (configPanel == null)
+            //     {
+            //         return false;
+            //     }
 
             configPanel.Controls.Clear();
-            lrcSettings = new LRCSettings(_fontSize) { Dock = DockStyle.Fill };
-            configPanel.Controls.Add(lrcSettings);
-            return false;
+            //     lrcSettings = new LRCSettings(_fontSize) { Dock = DockStyle.Fill };
+            //     configPanel.Controls.Add(lrcSettings);
+            //     return false;
         }
 
         // presence of this method tells MusicBee the plugin has a dockable panel
@@ -250,60 +251,10 @@ namespace MusicBeePlugin
         }
         public void SaveSettings()
         {
-            if (lrcSettings != null)
-            {
-                _fontSize = lrcSettings.FontSize;
-                _lyricsViewControl?.SetFontSize(_fontSize);
-            }
-
-            if (!TryGetFontSizeSettingsPath(out string settingsPath))
-            {
-                return;
-            }
-
-            try
-            {
-                File.WriteAllText(settingsPath, _fontSize.ToString(CultureInfo.InvariantCulture));
-            }
-            catch (IOException ex)
-            {
-                mbApiInterface.MB_Trace("Failed to save lyrics font size: " + ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                mbApiInterface.MB_Trace("Failed to save lyrics font size: " + ex.Message);
-            }
         }
 
         private void LoadSettings()
         {
-            if (!TryGetFontSizeSettingsPath(out string settingsPath) || !File.Exists(settingsPath))
-            {
-                return;
-            }
-
-            try
-            {
-                string setting = File.ReadAllText(settingsPath);
-                if (int.TryParse(setting, NumberStyles.Integer, CultureInfo.InvariantCulture, out int fontSize) &&
-                    fontSize >= SettingsPanel.MinimumFontSize &&
-                    fontSize <= SettingsPanel.MaximumFontSize)
-                {
-                    _fontSize = fontSize;
-                }
-                else
-                {
-                    mbApiInterface.MB_Trace("Ignoring invalid lyrics font size setting.");
-                }
-            }
-            catch (IOException ex)
-            {
-                mbApiInterface.MB_Trace("Failed to load lyrics font size: " + ex.Message);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                mbApiInterface.MB_Trace("Failed to load lyrics font size: " + ex.Message);
-            }
         }
 
         private bool TryGetFontSizeSettingsPath(out string settingsPath)
