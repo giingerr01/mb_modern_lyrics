@@ -37,7 +37,7 @@
             // 
             this.LyricsLabel.AutoSize = true;
             this.LyricsLabel.Font = new System.Drawing.Font("Segoe UI Semibold", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LyricsLabel.Location = new System.Drawing.Point(44, 17);
+            this.LyricsLabel.Location = new System.Drawing.Point(-3, 0);
             this.LyricsLabel.Name = "LyricsLabel";
             this.LyricsLabel.Size = new System.Drawing.Size(63, 13);
             this.LyricsLabel.TabIndex = 0;
@@ -48,7 +48,7 @@
             // 
             this.fontSizeBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fontSizeBox.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.fontSizeBox.Location = new System.Drawing.Point(99, 33);
+            this.fontSizeBox.Location = new System.Drawing.Point(82, 17);
             this.fontSizeBox.Name = "fontSizeBox";
             this.fontSizeBox.ReadOnly = true;
             this.fontSizeBox.Size = new System.Drawing.Size(178, 20);
