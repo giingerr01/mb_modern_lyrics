@@ -1,8 +1,11 @@
-﻿using System;
+﻿//ModernLyricsPlugin.cs
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Globalization;
 using System.Windows.Forms;
+using MusicBeePlugin.Enhanced_lyrics;
 
 namespace MusicBeePlugin
 {
@@ -13,14 +16,21 @@ namespace MusicBeePlugin
 
         private LyricsViewControl _lyricsViewControl;
         private Control _dockablePanel;
+        private LRCSettings lrcSettings;
         private System.Timers.Timer _positionTimer;
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
+
+        private int _fontSize = 10;
+        private string _font = "Lucida Sans";
+
+        private const string FontSizeSettingsFileName = "lyrics-font-size.txt";
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
             System.Diagnostics.Debug.WriteLine("<Inialize()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             mbApiInterface = new MusicBeeApiInterface();
             mbApiInterface.Initialise(apiInterfacePtr);
+            LoadSettings();
             about.PluginInfoVersion = 1;
             about.Name = "LRC Lyrics Panel";
             about.Description = "Line-by-line synchronized (LRC) lyrics panel.";
@@ -28,22 +38,61 @@ namespace MusicBeePlugin
             about.TargetApplication = "LRC Lyrics";
             about.Type = PluginType.PanelView;
             about.VersionMajor = 1;
-            about.VersionMinor = 0;
+            about.VersionMinor = 1;
             about.Revision = 1;
             about.MinInterfaceVersion = MinInterfaceVersion;
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
-            about.ConfigurationPanelHeight = 0;
+            about.ConfigurationPanelHeight = 60;
 
             return about;
         }
 
         public bool Configure(IntPtr panelHandle)
         {
-            // System.Diagnostics.Debug.WriteLine("<Configure(IntPtr PanelHandle)>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-            if (panelHandle != IntPtr.Zero)
+            if (panelHandle == IntPtr.Zero)
             {
+                return false;
             }
+
+            Control configPanel = Control.FromHandle(panelHandle);
+            if (configPanel == null)
+            {
+                return false;
+            }
+
+            configPanel.Controls.Clear();
+
+            lrcSettings = new LRCSettings(_font, _fontSize)
+            {
+                Dock = DockStyle.Fill
+            };
+
+            System.Diagnostics.Debug.WriteLine(
+                $"LRCSettings null: {lrcSettings == null}");
+
+
+            lrcSettings.FontSelectionChanged += (font, size) =>
+            {
+                _font = font;
+                _fontSize = size;
+
+                RunOnUiThreadYouMf(() =>
+                {
+                    _lyricsViewControl?.SetFontSize(_fontSize, _font);
+                });
+            };
+
+            lrcSettings.ActiveColorChanged += color =>
+            {
+                RunOnUiThreadYouMf(() =>
+                {
+                    _lyricsViewControl?.SetActiveColor(color);
+                });
+            };
+
+            configPanel.Controls.Add(lrcSettings);
+
             return false;
         }
 
@@ -70,8 +119,13 @@ namespace MusicBeePlugin
                 _positionTimer.Elapsed += PositionTimer_Elapsed;
             }
             _lyricsViewControl?.Dispose();
+
             _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
+
+            _lyricsViewControl.SetFontSize(_fontSize, _font);
+
             _lyricsViewControl.SetLyrics(_currentLyrics);
+
             panel.Controls.Add(_lyricsViewControl);
 
             //makeing  sure that the lyrics are loaded even if plugin startup fired bfore panel creating
@@ -236,6 +290,23 @@ namespace MusicBeePlugin
         {
         }
 
+        private void LoadSettings()
+        {
+        }
+
+        private bool TryGetFontSizeSettingsPath(out string settingsPath)
+        {
+            string storagePath = mbApiInterface.Setting_GetPersistentStoragePath();
+            if (string.IsNullOrWhiteSpace(storagePath))
+            {
+                mbApiInterface.MB_Trace("MusicBee did not provide a settings storage path.");
+                settingsPath = null;
+                return false;
+            }
+
+            settingsPath = Path.Combine(storagePath, FontSizeSettingsFileName);
+            return true;
+        }
 
 
     }

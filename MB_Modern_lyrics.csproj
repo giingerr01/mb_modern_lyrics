@@ -87,6 +87,12 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Models\LineByLineLyricsModels.cs" />
+    <Compile Include="Enhanced_lyrics\LRCSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Enhanced_lyrics\LRCSettings.Designer.cs">
+      <DependentUpon>LRCSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Enhanced_lyrics\ModernLyricsPlugins.cs" />
     <Compile Include="MusicBeeInterface.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -117,7 +123,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Enhanced_lyrics\LineByLineLyrics\Settings\" />
+    <EmbeddedResource Include="Enhanced_lyrics\LRCSettings.resx">
+      <DependentUpon>LRCSettings.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="MusicBee.local.targets" Condition="Exists('MusicBee.local.targets')" />
