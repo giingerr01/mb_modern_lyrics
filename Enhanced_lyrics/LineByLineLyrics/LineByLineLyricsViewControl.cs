@@ -28,8 +28,12 @@ namespace MusicBeePlugin
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
         private ParsedLyrics _lyrics = new ParsedLyrics();
-        private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
-        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
+
+        private Color _activeColor = Color.Black;
+        private Color _inactiveColor = Color.WhiteSmoke;
+
+        private SolidBrush _activeBrush;
+        private SolidBrush _inactiveBrush;
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -52,9 +56,22 @@ namespace MusicBeePlugin
             _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
 
+        public void SetActiveColor(Color color)
+        {
+            _activeColor = color;
+            _activeBrush.Dispose();
+            _activeBrush = new SolidBrush(_activeColor);
+
+            Invalidate();
+
+        }
+
         public LyricsViewControl()
         {
             IntializeFonts();
+            _activeBrush = new SolidBrush(_activeColor);
+            _inactiveBrush = new SolidBrush(_inactiveColor);
+
             this.SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |
                      ControlStyles.OptimizedDoubleBuffer |
