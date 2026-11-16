@@ -30,13 +30,14 @@
         {
             this.LyricsLabel = new System.Windows.Forms.Label();
             this.fontSizeBox = new System.Windows.Forms.TextBox();
+            this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.SuspendLayout();
             // 
             // LyricsLabel
             // 
             this.LyricsLabel.AutoSize = true;
             this.LyricsLabel.Font = new System.Drawing.Font("Segoe UI Semibold", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LyricsLabel.Location = new System.Drawing.Point(46, 42);
+            this.LyricsLabel.Location = new System.Drawing.Point(44, 17);
             this.LyricsLabel.Name = "LyricsLabel";
             this.LyricsLabel.Size = new System.Drawing.Size(63, 13);
             this.LyricsLabel.TabIndex = 0;
@@ -47,21 +48,22 @@
             // 
             this.fontSizeBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fontSizeBox.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.fontSizeBox.Location = new System.Drawing.Point(103, 58);
+            this.fontSizeBox.Location = new System.Drawing.Point(99, 33);
             this.fontSizeBox.Name = "fontSizeBox";
             this.fontSizeBox.ReadOnly = true;
             this.fontSizeBox.Size = new System.Drawing.Size(204, 20);
             this.fontSizeBox.TabIndex = 1;
+            this.fontSizeBox.Click += new System.EventHandler(this.FontSelctor_Click);
             // 
             // LRCSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.Window;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.Controls.Add(this.fontSizeBox);
             this.Controls.Add(this.LyricsLabel);
             this.Name = "LRCSettings";
-            this.Size = new System.Drawing.Size(392, 150);
+            this.Size = new System.Drawing.Size(344, 118);
             this.Load += new System.EventHandler(this.LRCSettings_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -72,5 +74,6 @@
 
         private System.Windows.Forms.Label LyricsLabel;
         private System.Windows.Forms.TextBox fontSizeBox;
+        private System.Windows.Forms.FontDialog fontDialog1;
     }
 }
