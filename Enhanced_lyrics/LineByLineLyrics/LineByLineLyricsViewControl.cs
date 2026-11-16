@@ -26,7 +26,7 @@ namespace MusicBeePlugin
         private Font _activeFont;
         private Font _inactiveFont;
         private int _fontSize = 10;
-        private string font = "Lucida Sans";
+        private string _font = "Lucida Sans";
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
         private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
@@ -48,8 +48,8 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            _activeFont = new Font(font, _fontSize, FontStyle.Bold);
-            _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
+            _activeFont = new Font(_font, _fontSize, FontStyle.Bold);
+            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
         }
 
         public LyricsViewControl()
@@ -77,22 +77,26 @@ namespace MusicBeePlugin
             Invalidate();
         }
 
-        public void SetFontSize(int fontSize)
+        public void SetFontSize(int fontSize, String font)
         {
             if (fontSize < 8 || fontSize > 72)
             {
                 throw new ArgumentOutOfRangeException(nameof(fontSize));
             }
 
-            if (_fontSize == fontSize)
+            if (_font == font && _fontSize == fontSize)
             {
                 return;
             }
 
+            _font = font;
             _fontSize = fontSize;
+
             _activeFont.Dispose();
             _inactiveFont.Dispose();
+
             IntializeFonts();
+
             _layoutDirty = true;
             _animTimer.Stop();
             Invalidate();
