@@ -75,13 +75,14 @@
             this.alignmentComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.alignmentComboBox.FormattingEnabled = true;
             this.alignmentComboBox.Items.AddRange(new object[] {
-            "Defalut Text Alignment",
+            "Default Text Alignment",
             "Left Text Alignment",
             "Right Text Alignment"});
             this.alignmentComboBox.Location = new System.Drawing.Point(82, 3);
             this.alignmentComboBox.Name = "alignmentComboBox";
             this.alignmentComboBox.Size = new System.Drawing.Size(178, 21);
             this.alignmentComboBox.TabIndex = 4;
+            this.alignmentComboBox.SelectedIndexChanged += new System.EventHandler(this.AlignmentComboBox_SelectedIndexChanged);
             // 
             // LRCSettings
             // 
