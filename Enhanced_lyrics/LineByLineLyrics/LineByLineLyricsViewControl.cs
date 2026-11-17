@@ -233,15 +233,15 @@ namespace MusicBeePlugin
             _layoutDirty = false;
         }
 
-        private Color BlendingThisBitch(Color foreground, Color background, float fadeRate)
+        private Color BlendingThisBitch(Color foreground, Color background, float visibility)
         {
             float minFloor = 0f;
             float maxAlpha = 1f;
-            fadeRate = Math.Max(minFloor, Math.Min(maxAlpha, fadeRate));
+            visibility = Math.Max(minFloor, Math.Min(maxAlpha, visibility));
 
-            int r = (int)(background.R + (foreground.R - background.R) * fadeRate);
-            int g = (int)(background.G + (foreground.G - background.G) * fadeRate);
-            int b = (int)(background.B + (foreground.B - background.B) * fadeRate);
+            int r = (int)(background.R + (foreground.R - background.R) * visibility);
+            int g = (int)(background.G + (foreground.G - background.G) * visibility);
+            int b = (int)(background.B + (foreground.B - background.B) * visibility);
 
             return Color.FromArgb(r, g, b);
         }
@@ -256,7 +256,7 @@ namespace MusicBeePlugin
 
             float dimAmount;
             switch (distance)
-            {
+            {//Future work is not use switch and use animatioon for it but i will apply it when i learn more about tit.
                 case 1:
                     dimAmount = 0.90f;
                     break;
