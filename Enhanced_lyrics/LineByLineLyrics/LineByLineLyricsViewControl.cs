@@ -27,10 +27,12 @@ namespace MusicBeePlugin
         private Font _inactiveFont;
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
+        private FontStyle _fontStyle = FontStyle.Regular;
+
         private ParsedLyrics _lyrics = new ParsedLyrics();
 
         private Color _activeColor = Color.Black;
-        private Color _inactiveColor = Color.WhiteSmoke;
+        private Color _inactiveColor = Color.Gray;
         private Color _backColor = Color.White;
 
         private SolidBrush _activeBrush;
@@ -53,8 +55,8 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            _activeFont = new Font(_font, _fontSize, FontStyle.Bold);
-            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
+            _activeFont = new Font(_font, _fontSize, _fontStyle);
+            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), _fontStyle);
         }
 
         public void SetActiveColor(Color color)
@@ -64,6 +66,12 @@ namespace MusicBeePlugin
                 _activeBrush.Dispose();
                 _activeBrush = new SolidBrush(_activeColor);
             }
+            Invalidate();
+        }
+
+        public void SetInActiveColor(Color color)
+        {
+            _inactiveColor = color;
             Invalidate();
         }
 
@@ -95,20 +103,20 @@ namespace MusicBeePlugin
             Invalidate();
         }
 
-        public void SetFontSize(int fontSize, String font)
+        public void SetFontSize(int fontSize, string font, FontStyle fontStyle)
         {
             if (fontSize < 8 || fontSize > 72)
             {
                 throw new ArgumentOutOfRangeException(nameof(fontSize));
             }
 
-            if (_font == font && _fontSize == fontSize)
+            if (_font == font && _fontSize == fontSize && _fontStyle == fontStyle)
             {
                 return;
             }
-
             _font = font;
             _fontSize = fontSize;
+            _fontStyle = fontStyle;
 
             _activeFont.Dispose();
             _inactiveFont.Dispose();
