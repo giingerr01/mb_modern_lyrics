@@ -1,9 +1,25 @@
-MB_Modern_lyrics.csproj.user
-*.vs
-*bin
-*builds
-*bin
+# Visual Studio and user-specific files
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+Debug/
+Release/
+build/
+builds/
+TestResults/
+
+# Restored NuGet packages
+packages/
+
+# Local deployment configuration
 MusicBee.local.targets
-*obj    
-*Debug
-*packages
+
+# Temporary and generated files
+*.log
+*.tmp
+*.bak
+*.cache
