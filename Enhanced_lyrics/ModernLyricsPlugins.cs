@@ -146,7 +146,8 @@ namespace MusicBeePlugin
             configPanel.Controls.Clear();
 
             _bgColor = GetSkinPanelBackgroundColor();
-            lrcSettings = new LRCSettings(_font, _fontSize, _bgColor, _fontStyle)
+            lrcSettings = new LRCSettings(
+                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor)
             {
                 Dock = DockStyle.Fill
             };
@@ -169,15 +170,16 @@ namespace MusicBeePlugin
                 });
             };
 
-            lrcSettings.ActiveColorChanged += color =>
+            lrcSettings.ActiveColorChanged += (color, useCustomColor) =>
             {
                 _activeColor = color;
+                _useCustomColor = useCustomColor;
                 SaveSettings();
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _lyricsViewControl?.SetActiveColor(color);
-                    SaveSettings();
+                    _lyricsViewControl?.SetActiveColor(
+                        _useCustomColor ? _activeColor : Color.Black);
                 });
             };
 
@@ -229,7 +231,7 @@ namespace MusicBeePlugin
 
             _lyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
 
-            _lyricsViewControl.SetActiveColor(_activeColor);
+            _lyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
 
             _lyricsViewControl.SetInActiveColor(fgColor);
 
