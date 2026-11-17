@@ -258,25 +258,25 @@ namespace MusicBeePlugin
             switch (distance)
             {
                 case 1:
-                    dimAmount = 0.75f;
+                    dimAmount = 0.90f;
                     break;
                 case 2:
-                    dimAmount = 0.55f;
+                    dimAmount = 0.75f;
                     break;
                 case 3:
-                    dimAmount = 0.35f;
+                    dimAmount = 0.60f;
                     break;
                 case 4:
-                    dimAmount = 0.25f;
+                    dimAmount = 0.45f;
                     break;
                 case 5:
-                    dimAmount = 0.15f;
+                    dimAmount = 0.30f;
                     break;
                 case 6:
-                    dimAmount = 0.10f;
+                    dimAmount = 0.15f;
                     break;
                 default:
-                    dimAmount = 0.05f;
+                    dimAmount = 0.10f;
                     break;
             }
             return BlendingThisBitch(_inactiveColor, BackColor, dimAmount);
