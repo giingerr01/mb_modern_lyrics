@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO.Compression;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin
@@ -232,12 +233,15 @@ namespace MusicBeePlugin
             _layoutDirty = false;
         }
 
-        private Color BlendingThisBitch(Color foreground, Color background, float amount)
+        private Color BlendingThisBitch(Color foreground, Color background, float fadeRate)
         {
-            amount = Math.Max(0f, Math.Min(1f, amount));
-            int r = (int)(background.R + (foreground.R - background.R) * amount);
-            int g = (int)(background.G + (foreground.G - background.G) * amount);
-            int b = (int)(background.B + (foreground.B - background.B) * amount);
+            float minFloor = 0f;
+            float maxAlpha = 1f;
+            fadeRate = Math.Max(minFloor, Math.Min(maxAlpha, fadeRate));
+
+            int r = (int)(background.R + (foreground.R - background.R) * fadeRate);
+            int g = (int)(background.G + (foreground.G - background.G) * fadeRate);
+            int b = (int)(background.B + (foreground.B - background.B) * fadeRate);
 
             return Color.FromArgb(r, g, b);
         }
@@ -254,16 +258,25 @@ namespace MusicBeePlugin
             switch (distance)
             {
                 case 1:
-                    dimAmount = 0.25f;
+                    dimAmount = 0.75f;
                     break;
                 case 2:
-                    dimAmount = 0.45f;
+                    dimAmount = 0.55f;
                     break;
                 case 3:
-                    dimAmount = 0.60f;
+                    dimAmount = 0.35f;
+                    break;
+                case 4:
+                    dimAmount = 0.25f;
+                    break;
+                case 5:
+                    dimAmount = 0.15f;
+                    break;
+                case 6:
+                    dimAmount = 0.10f;
                     break;
                 default:
-                    dimAmount = 0.75f;
+                    dimAmount = 0.05f;
                     break;
             }
             return BlendingThisBitch(_inactiveColor, BackColor, dimAmount);
