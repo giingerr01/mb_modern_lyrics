@@ -415,10 +415,29 @@ namespace MusicBeePlugin
             }
         }
 
-        public List<ToolStripItem> GetHeaderMenuItems()
+        // refresh handler for menu item in header
+        private void RefreshLyricsPanel()
+        {
+            RunOnUiThreadYouMf(() =>
+            {
+                _lyricsViewControl?.Invalidate();
+                _lyricsViewControl?.Refresh();
+
+                LoadCurrentTrackLyrics();
+                SyncPosition();
+            });
+        }
+
+        // added header menu items for menu using GetMenuItems for this method the Method "GetMenuHeaderItmes()" doesnt work or it seems its been update to the one iam using
+        // for my method dont change this method. 
+        //                            |
+        public List<ToolStripItem> GetMenuItems()
         {
             List<ToolStripItem> list = new List<ToolStripItem>();
             list.Add(new ToolStripMenuItem("Reload Lyrics", null, (s, e) => LoadCurrentTrackLyrics()));
+            list.Add(new ToolStripSeparator());
+            list.Add(new ToolStripMenuItem("Refresh panel", null, (s, e) => RefreshLyricsPanel()));
+
             return list;
         }
         public void Uninstall()
