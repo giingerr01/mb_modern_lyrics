@@ -29,6 +29,7 @@ namespace MusicBeePlugin
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
         private FontStyle _fontStyle = FontStyle.Regular;
+        private bool _useCustomColor = false;
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
         private Color _bgColor = Color.White;
@@ -118,6 +119,7 @@ namespace MusicBeePlugin
             lyricsSettings["Font"] = _font;
             lyricsSettings["ActiveColor"] = ColorTranslator.ToHtml(_activeColor);
             lyricsSettings["FontStyle"] = _fontStyle.ToString();
+            lyricsSettings["UseCustomColor"] = _useCustomColor;
 
             settingsJson["Lyrics-Settings"] = lyricsSettings;
 
@@ -448,6 +450,7 @@ namespace MusicBeePlugin
         {
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
+            _useCustomColor = Settings.Value<bool?>("UseCustomColor") ?? false;
 
             string savedStyle = Settings.Value<string>("FontStyle") ?? "Regular";
             if (Enum.TryParse(savedStyle, out FontStyle style))
