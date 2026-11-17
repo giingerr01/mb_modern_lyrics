@@ -1,0 +1,171 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace MusicBeePlugin.Enhanced_lyrics
+{
+
+    // Color backGroundColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
+    // SkinElement.SkinInputPanel,
+    //         ElementState.ElementStateDefault,
+    //         ElementComponent.ComponentBackground));
+    public partial class LRCSettings : UserControl
+    {
+        private string _font = "Lucida Sans";
+        private int _fontSize = 10;
+        private FontStyle _fontStyle = FontStyle.Regular;
+        private Color _activeColor = Color.Black;
+        private Color _defaultCheckBoxForeColor;
+        private bool _initializing;
+        public event Action<string, int, FontStyle> FontSelectionChanged;
+        public event Action<Color, bool> ActiveColorChanged;
+        public event Action<StringAlignment> LyricsAlignmentChanged;
+
+
+        public LRCSettings(
+            string font,
+            int fontSize,
+            Color bgColor,
+            FontStyle fontStyle,
+            Color activeColor,
+            bool useCustomColor,
+            StringAlignment lyricsAlignment
+            )
+        {
+            InitializeComponent();
+            _defaultCheckBoxForeColor = CustomColorCheckBox.ForeColor;
+            this.BackColor = bgColor;
+            LyricsLabel.BackColor = Color.Transparent;
+            fontSizeBox.BackColor = bgColor;
+            CustomColorCheckBox.UseVisualStyleBackColor = false;
+            CustomColorCheckBox.BackColor = bgColor;
+            _initializing = true;
+            _font = font;
+            _fontSize = fontSize;
+            _fontStyle = fontStyle;
+            _activeColor = activeColor;
+            fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+
+            alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
+            CustomColorCheckBox.Checked = useCustomColor;
+            CustomColorCheckBox.ForeColor = useCustomColor
+                ? activeColor
+                : _defaultCheckBoxForeColor;
+            _initializing = false;
+        }
+
+        private static int GetAlignmentIndex(StringAlignment alignment)
+        {
+            switch (alignment)
+            {
+                case StringAlignment.Near:
+                    return 1;
+                case StringAlignment.Far:
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
+        private void AlignmentComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_initializing)
+            {
+                return;
+            }
+
+            StringAlignment alignment;
+            switch (alignmentComboBox.SelectedIndex)
+            {
+                case 1:
+                    alignment = StringAlignment.Near;
+                    break;
+                case 2:
+                    alignment = StringAlignment.Far;
+                    break;
+                default:
+                    alignment = StringAlignment.Center;
+                    break;
+            }
+
+            LyricsAlignmentChanged?.Invoke(alignment);
+        }
+
+        private void LRCSettings_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void LyricsLabel_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void FontSelctor_Click(object sender, EventArgs e)
+        {
+            using (FontDialog fontDialog = new FontDialog())
+            {
+                fontDialog.Font = new Font(_font, _fontSize);
+
+                if (fontDialog.ShowDialog() == DialogResult.OK)
+                {
+                    _font = fontDialog.Font.Name;
+                    _fontSize = (int)fontDialog.Font.Size;
+                    _fontStyle = fontDialog.Font.Style;
+
+                    fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+                    FontSelectionChanged?.Invoke(_font, _fontSize, _fontStyle);
+                }
+            }
+
+        }
+
+        private void FontSizeBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void CustomColorCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_initializing)
+            {
+                return;
+            }
+
+            if (CustomColorCheckBox.Checked)
+            {
+                using (ColorDialog colorDialog = new ColorDialog())
+                {
+                    colorDialog.Color = _activeColor;
+                    colorDialog.FullOpen = true;
+
+                    if (colorDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        _activeColor = colorDialog.Color;
+                        CustomColorCheckBox.ForeColor = _activeColor;
+                        ActiveColorChanged?.Invoke(_activeColor, true);
+                    }
+                    else
+                    {
+                        _initializing = true;
+                        CustomColorCheckBox.Checked = false;
+                        CustomColorCheckBox.ForeColor = _defaultCheckBoxForeColor;
+                        _initializing = false;
+                    }
+                }
+            }
+            else
+            {
+                CustomColorCheckBox.ForeColor = _defaultCheckBoxForeColor;
+                ActiveColorChanged?.Invoke(_activeColor, false);
+            }
+
+        }
+    }
+}

@@ -25,12 +25,19 @@ namespace MusicBeePlugin
 
         private Font _activeFont;
         private Font _inactiveFont;
+        private int _fontSize = 10;
+        private string _font = "Lucida Sans";
+        private FontStyle _fontStyle = FontStyle.Regular;
 
-        private string font = "Lucida Sans";
-        private readonly int _fontSize = 10;
         private ParsedLyrics _lyrics = new ParsedLyrics();
-        private readonly SolidBrush _activeBrush = new SolidBrush(Color.Black);
-        private readonly SolidBrush _inactiveBrush = new SolidBrush(Color.LightGray);
+
+        private Color _activeColor = Color.Black;
+        private Color _inactiveColor = Color.Gray;
+        private Color _backColor = Color.White;
+        private StringAlignment _lyricsAlignment = StringAlignment.Center;
+
+        private SolidBrush _activeBrush;
+        private SolidBrush _inactiveBrush;
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -49,19 +56,38 @@ namespace MusicBeePlugin
 
         private void IntializeFonts()
         {
-            _activeFont = new Font(font, _fontSize, FontStyle.Bold);
-            _inactiveFont = new Font(font, Math.Max(9, _fontSize - 1), FontStyle.Bold);
+            _activeFont = new Font(_font, _fontSize, _fontStyle);
+            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), _fontStyle);
+        }
+
+        public void SetActiveColor(Color color)
+        {
+            {
+                _activeColor = color;
+                _activeBrush.Dispose();
+                _activeBrush = new SolidBrush(_activeColor);
+            }
+            Invalidate();
+        }
+
+        public void SetInActiveColor(Color color)
+        {
+            _inactiveColor = color;
+            Invalidate();
         }
 
         public LyricsViewControl()
         {
             IntializeFonts();
+            _activeBrush = new SolidBrush(_activeColor);
+            _inactiveBrush = new SolidBrush(_inactiveColor);
+
             this.SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.UserPaint |
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
             this.UpdateStyles();
-            BackColor = Color.FromArgb(255, 255, 255);
+            BackColor = _backColor;
 
             _animTimer = new Timer { Interval = 15 };
             _animTimer.Tick += AnimTimer_Tick;
@@ -75,6 +101,50 @@ namespace MusicBeePlugin
             _targetY = 0;
             _layoutDirty = true;
             _animTimer.Stop();
+            Invalidate();
+        }
+
+        public void SetFontSize(int fontSize, string font, FontStyle fontStyle)
+        {
+            if (fontSize < 8 || fontSize > 72)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fontSize));
+            }
+
+            if (_font == font && _fontSize == fontSize && _fontStyle == fontStyle)
+            {
+                return;
+            }
+            _font = font;
+            _fontSize = fontSize;
+            _fontStyle = fontStyle;
+
+            _activeFont.Dispose();
+            _inactiveFont.Dispose();
+
+            IntializeFonts();
+
+            _layoutDirty = true;
+            _animTimer.Stop();
+            Invalidate();
+        }
+
+        public void SetLyricsAlignment(StringAlignment alignment)
+        {
+            if (alignment != StringAlignment.Near &&
+                alignment != StringAlignment.Center &&
+                alignment != StringAlignment.Far)
+            {
+                throw new ArgumentOutOfRangeException(nameof(alignment));
+            }
+
+            if (_lyricsAlignment == alignment)
+            {
+                return;
+            }
+
+            _lyricsAlignment = alignment;
+            _lineFormat.Alignment = alignment;
             Invalidate();
         }
 
@@ -167,7 +237,8 @@ namespace MusicBeePlugin
 
         private float ClampScroll(float value)
         {
-            return Math.Max(-8, Math.Min(MaxScroll(), value));
+            // -10 is to the gap size between the firs line of lyircs from the celieng of the LRC panle
+            return Math.Max(-10, Math.Min(MaxScroll(), value));
         }
 
         // synced: keeping the active line ahh...vericallly in center and unsynced lyrics keep the current clapmped target
@@ -179,6 +250,11 @@ namespace MusicBeePlugin
             }
 
             int i = Math.Max(_currentIndex, 0);
+
+            /// its been crazy here chattth puja is almost ending and here i am doing nothing and writeing this useless plugin
+            //  dekhthe hai kya hota h
+
+            /// clamp the top line so the top part doesnt show show blacnk Panle 
             return ClampScroll(_tops[i] + _heights[i] / 2f - ClientSize.Height / 2f);
         }
 
@@ -206,7 +282,7 @@ namespace MusicBeePlugin
             }
         }
 
-        // unsynchronized lyrics can be scrolled manually
+        // unsynced lyrics can be scrolled manually
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
@@ -229,7 +305,8 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.SingleBitPerPixelGridFit;   // smoother while scrolling than GridFit
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            // use gridfit so it can render text with sharp clarity it does comes with a tradeoff in perfomace of smoothness of the lyrics scrolling
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)

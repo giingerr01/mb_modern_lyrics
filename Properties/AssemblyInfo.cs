@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("A MusicBee plugin for Enhanced lyrics.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("giingerr01")]
-[assembly: AssemblyProduct("MB Modern Lyrics")]
+[assembly: AssemblyProduct("MB Enhanced Lyrics Plugin For MusicBee")]
 [assembly: AssemblyCopyright("Copyright © 2026 giingerr01")]
 [assembly: AssemblyTrademark("MusicBee")]
 [assembly: AssemblyCulture("")]

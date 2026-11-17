@@ -26,6 +26,10 @@ namespace MusicBeePlugin
 
         private static readonly TimeSpan LastLineDuration = TimeSpan.FromSeconds(5);
 
+        private static string RemoveVocalTags(string line)
+        {
+            return Regex.Replace(line, @"^\s*V\d+:\s*", "", RegexOptions.IgnoreCase);
+        }
         public static ParsedLyrics Parse(string rawLrc)
         {
             var result = new ParsedLyrics();
@@ -34,7 +38,10 @@ namespace MusicBeePlugin
                 return result;
             }
 
+
             string[] lines = rawLrc.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+
+
             var plainLines = new List<string>();
 
             foreach (string line in lines)
@@ -63,21 +70,30 @@ namespace MusicBeePlugin
                 var lineMatch = LineRegex.Match(trimmed);
                 if (!lineMatch.Success)
                 {
-                    plainLines.Add(trimmed);
+                    plainLines.Add(RemoveVocalTags(trimmed));
                     continue;
                 }
 
-                string text = lineMatch.Groups["text"].Value.Trim();
-
-                // one entry per timestamp, so [00:12.00][01:30.00]text becomes two lines
-                foreach (Match sm in SingleStampRegex.Matches(lineMatch.Groups["stamps"].Value))
+                // removing v1 v2 tags befor hand
+                try
                 {
-                    result.Lines.Add(new LyricLine
+                    string text = RemoveVocalTags(lineMatch.Groups["text"].Value.Trim());
+
+                    // one entry per timestamp, so [00:12.00][01:30.00]text becomes two lines
+                    foreach (Match sm in SingleStampRegex.Matches(lineMatch.Groups["stamps"].Value))
                     {
-                        StartTime = ParseTimestamp(sm.Groups["ts"].Value),
-                        Text = text
-                    });
+                        result.Lines.Add(new LyricLine
+                        {
+                            StartTime = ParseTimestamp(sm.Groups["ts"].Value),
+                            Text = text
+                        });
+                    }
                 }
+                catch (Exception ex)
+                {
+                    Logger.Log("Error while Removin prefix tags: " + ex.Message);
+                }
+
             }
 
             // no timestamps at all: plain, unsynchronized lyrics (file order is kept as-is)
