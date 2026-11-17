@@ -6,3 +6,4 @@ MB_Modern_lyrics.csproj.user
 MusicBee.local.targets
 *obj    
 *Debug
+*packages
