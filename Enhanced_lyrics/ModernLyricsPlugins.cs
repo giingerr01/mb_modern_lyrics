@@ -28,7 +28,9 @@ namespace MusicBeePlugin
 
         private int _fontSize = 10;
         private string _font = "Lucida Sans";
+        private FontStyle _fontStyle = FontStyle.Regular;
         private Color _activeColor = Color.Black;
+        private Color _inactiveColor = Color.Gray;
         private Color _bgColor = Color.White;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
@@ -115,6 +117,7 @@ namespace MusicBeePlugin
             lyricsSettings["FontSize"] = _fontSize;
             lyricsSettings["Font"] = _font;
             lyricsSettings["ActiveColor"] = ColorTranslator.ToHtml(_activeColor);
+            lyricsSettings["FontStyle"] = _fontStyle.ToString();
 
             settingsJson["Lyrics-Settings"] = lyricsSettings;
 
@@ -141,7 +144,7 @@ namespace MusicBeePlugin
             configPanel.Controls.Clear();
 
             _bgColor = GetSkinPanelBackgroundColor();
-            lrcSettings = new LRCSettings(_font, _fontSize, _bgColor)
+            lrcSettings = new LRCSettings(_font, _fontSize, _bgColor, _fontStyle)
             {
                 Dock = DockStyle.Fill
             };
@@ -150,16 +153,17 @@ namespace MusicBeePlugin
                 $"LRCSettings null: {lrcSettings == null}");
 
 
-            lrcSettings.FontSelectionChanged += (font, size) =>
+            lrcSettings.FontSelectionChanged += (font, size, fontStyle) =>
             {
                 _font = font;
                 _fontSize = size;
+                _fontStyle = fontStyle;
 
                 SaveSettings();
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _lyricsViewControl?.SetFontSize(_fontSize, _font);
+                    _lyricsViewControl?.SetFontSize(_fontSize, _font, _fontStyle);
                 });
             };
 
@@ -215,17 +219,17 @@ namespace MusicBeePlugin
 
             Color bgColor = GetSkinPanelBackgroundColor();
 
-            Color fgColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
-                SkinElement.SkinInputPanel, ElementState.ElementStateDefault,
-                ElementComponent.ComponentForeground
-            ));
+            Color fgColor = GetSkinForeColor();
+
 
             // _lyricsViewControl.SetBackgroundColor(bgColor);
             _lyricsViewControl.BackColor = bgColor;
 
-            _lyricsViewControl.SetFontSize(_fontSize, _font);
+            _lyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
 
             _lyricsViewControl.SetActiveColor(_activeColor);
+
+            _lyricsViewControl.SetInActiveColor(fgColor);
 
             _lyricsViewControl.SetLyrics(_currentLyrics);
 
@@ -252,6 +256,14 @@ namespace MusicBeePlugin
                 SkinElement.SkinInputPanel,
                 ElementState.ElementStateDefault,
                 ElementComponent.ComponentBackground));
+        }
+        private Color GetSkinForeColor()
+        {
+            return Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
+                SkinElement.SkinInputPanel,
+                ElementState.ElementStateDefault,
+                ElementComponent.ComponentForeground
+            ));
         }
 
         public void ReceiveNotification(string sourceFileUrl, NotificationType type)
@@ -301,7 +313,7 @@ namespace MusicBeePlugin
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log("Reading LRC file failed: " + ex.Message);
+                    Logger.Log("Reading Embeded Lyrics failed: " + ex.Message);
                 }
             }
 
@@ -417,6 +429,12 @@ namespace MusicBeePlugin
         {
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
+
+            string savedStyle = Settings.Value<string>("FontStyle") ?? "Regular";
+            if (Enum.TryParse(savedStyle, out FontStyle style))
+            {
+                _fontStyle = style;
+            }
 
             string savedColor = Settings.Value<string>("ActiveColor");
             if (!string.IsNullOrEmpty(savedColor))
