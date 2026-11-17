@@ -2,30 +2,31 @@
 
 ## [1.2.0] - 2026-11-17
 
-### Breaking Changes
-
-- **`MB_Modern_lyrics.csproj` / `packages.config`:** Adds Newtonsoft.Json 13.0.4; restore NuGet packages before building the .NET Framework 4.8 project.
-
-### Architecture & Structure
-
-- **`ModernLyricsPlugins` / `LRCSettings`:** Connects the MusicBee configuration panel to live view updates and persists settings in `LrcSettings/LrcSettings.json` under MusicBee's persistent-storage path.
-
 ### Added
 
-- **`Enhanced_lyrics/LRCSettings.cs`:** Adds configuration controls for font family, size and style, active-line color, and lyrics alignment.
-- **`LyricsViewControl`:** Adds runtime setters for font, active/inactive colors, and near/center/far line alignment.
+- Added a configurable MusicBee settings panel for LRC lyrics, including font family, size, style, active-line color, and alignment controls.
+- Added persistent plugin settings stored in MusicBee's persistent data folder under `LrcSettings/LrcSettings.json`, so the user’s preferred lyric appearance is retained between sessions.
+- Added support for line-by-line LRC rendering with active-line highlighting, scroll anchoring, and alignment options for default, left, and right text placement.
+- Added fallback lyric loading from sidecar `.lrc` files and support for common metadata tags, offsets, and repeated timestamp entries in the parser.
 
-### Changed
+### Improved
 
-- **`LineByLineLyricsViewControl.cs`:** Uses ClearTypeGridFit for sharper lyric text and adjusts the upper scroll clamp from -8 to -10; the rendering mode trades some scrolling smoothness for clarity.
-- **`PluginInfo` / `Properties/AssemblyInfo.cs`:** Updates the MusicBee plugin name and assembly product metadata for the LRC Lyrics identity.
+- Improved the lyrics panel to use the MusicBee skin background and foreground colors more cleanly, keeping the UI readable and visually consistent with the host application.
+- Improved the playback view logic to keep the current lyric line centered in the panel while maintaining smooth scrolling and preventing the panel from showing blank space at the top.
+- Improved rendering quality by switching the graphics hint to ClearType grid fitting and updating the default font handling for sharper lyric text.
+- Improved the plugin metadata and configuration panel labels to present the feature as the “LRC Lyrics” panel and make the settings easier to understand.
 
 ### Fixed
 
-- **`LineByLineLyricsParser.cs`:** Removes leading `V<number>:` vocal markers from timed and unsynchronized lyric text so they are not rendered as part of the lyrics.
+- Fixed LRC parsing to strip leading vocal tags such as `V1:` and `V2:` before displaying lyrics.
+- Fixed alignment option handling so the selected combo-box value matches the actual left/right display behavior.
+- Fixed settings validation and save behavior so malformed JSON falls back to defaults instead of leaving the plugin in a broken state.
+- Fixed cleanup and panel creation logic so the lyrics view is recreated safely and the current track loads correctly when the MusicBee panel is created.
 
-### Handover Notes
+### Technical Changes
 
-- **`Lyrics-Settings` JSON object:** Stores `Font`, `FontSize`, `FontStyle`, `ActiveColor`, `UseCustomColor`, and `LyricsAlignment`; malformed JSON falls back to defaults and is rewritten on a later save.
-- **Version metadata:** The repository tag is `v1.2.0`, but MusicBee `PluginInfo` reports 1.1.1 and assembly version attributes remain 1.0.1.0; align these before the next release.
-- **`MusicBee.local.targets`:** Set `MusicBeePluginDir` for automatic deployment, or set `CopyPluginToMusicBee=false` to build without copying into MusicBee's plugin folder.
+- Removed the Costura/Fody integration from the project configuration to simplify the build and avoid extra packaging dependencies.
+- Updated the project and plugin metadata to clarify the panel identity and configuration height for MusicBee.
+- Kept local deployment support via `MusicBee.local.targets`, allowing a build to copy the plugin DLL into the MusicBee plugin directory when configured.
+
+> Note: the repository is tagged as `v1.2.0`, but the assembly metadata in `Properties/AssemblyInfo.cs` still reports version `1.0.1.0`. That mismatch should be reconciled before the next formal public release.
