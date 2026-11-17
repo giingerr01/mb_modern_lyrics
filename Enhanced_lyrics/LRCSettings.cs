@@ -25,6 +25,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private bool _initializing;
         public event Action<string, int, FontStyle> FontSelectionChanged;
         public event Action<Color, bool> ActiveColorChanged;
+        public event Action<StringAlignment> LyricsAlignmentChanged;
 
 
         public LRCSettings(
@@ -33,7 +34,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
             Color bgColor,
             FontStyle fontStyle,
             Color activeColor,
-            bool useCustomColor
+            bool useCustomColor,
+            StringAlignment lyricsAlignment
             )
         {
             InitializeComponent();
@@ -43,18 +45,56 @@ namespace MusicBeePlugin.Enhanced_lyrics
             fontSizeBox.BackColor = bgColor;
             CustomColorCheckBox.UseVisualStyleBackColor = false;
             CustomColorCheckBox.BackColor = bgColor;
+            _initializing = true;
             _font = font;
             _fontSize = fontSize;
             _fontStyle = fontStyle;
             _activeColor = activeColor;
             fontSizeBox.Text = $"{_font}, {_fontSize}pt";
 
-            _initializing = true;
+            alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
             CustomColorCheckBox.Checked = useCustomColor;
             CustomColorCheckBox.ForeColor = useCustomColor
                 ? activeColor
                 : _defaultCheckBoxForeColor;
             _initializing = false;
+        }
+
+        private static int GetAlignmentIndex(StringAlignment alignment)
+        {
+            switch (alignment)
+            {
+                case StringAlignment.Near:
+                    return 1;
+                case StringAlignment.Far:
+                    return 2;
+                default:
+                    return 0;
+            }
+        }
+
+        private void AlignmentComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_initializing)
+            {
+                return;
+            }
+
+            StringAlignment alignment;
+            switch (alignmentComboBox.SelectedIndex)
+            {
+                case 1:
+                    alignment = StringAlignment.Near;
+                    break;
+                case 2:
+                    alignment = StringAlignment.Far;
+                    break;
+                default:
+                    alignment = StringAlignment.Center;
+                    break;
+            }
+
+            LyricsAlignmentChanged?.Invoke(alignment);
         }
 
         private void LRCSettings_Load(object sender, EventArgs e)
