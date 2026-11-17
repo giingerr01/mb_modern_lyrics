@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.IO.Compression;
 using System.Windows.Forms;
@@ -357,8 +358,8 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
-            // use gridfit so it can render text with sharp clarity it does comes with a tradeoff in perfomace of smoothness of the lyrics scrolling
+            g.SmoothingMode = SmoothingMode.AntiAlias; // avoid Antialias bcz it can render text not very clean sharp
+            // using SmootingMode as bcz the comparing the Builtin and This pluigin they look same so yeahh.
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
