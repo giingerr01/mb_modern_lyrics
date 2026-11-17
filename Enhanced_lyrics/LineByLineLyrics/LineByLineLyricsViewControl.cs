@@ -62,11 +62,9 @@ namespace MusicBeePlugin
 
         public void SetActiveColor(Color color)
         {
-            {
-                _activeColor = color;
-                _activeBrush.Dispose();
-                _activeBrush = new SolidBrush(_activeColor);
-            }
+            _activeColor = color;
+            _activeBrush.Dispose();
+            _activeBrush = new SolidBrush(_activeColor);
             Invalidate();
         }
 
@@ -305,7 +303,7 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
             // use gridfit so it can render text with sharp clarity it does comes with a tradeoff in perfomace of smoothness of the lyrics scrolling
             g.Clear(BackColor);
 
