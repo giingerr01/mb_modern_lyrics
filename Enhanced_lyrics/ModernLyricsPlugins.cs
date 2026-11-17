@@ -278,7 +278,7 @@ namespace MusicBeePlugin
         private Color GetSkinForeColor()
         {
             return Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
-                SkinElement.SkinInputPanel,
+                SkinElement.SkinElementPanel,
                 ElementState.ElementStateDefault,
                 ElementComponent.ComponentForeground
             ));
