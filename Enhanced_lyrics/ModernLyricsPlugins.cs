@@ -33,6 +33,7 @@ namespace MusicBeePlugin
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
         private Color _bgColor = Color.White;
+        private StringAlignment _lyricsAlignment = StringAlignment.Center;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
         {
@@ -120,6 +121,7 @@ namespace MusicBeePlugin
             lyricsSettings["ActiveColor"] = ColorTranslator.ToHtml(_activeColor);
             lyricsSettings["FontStyle"] = _fontStyle.ToString();
             lyricsSettings["UseCustomColor"] = _useCustomColor;
+            lyricsSettings["LyricsAlignment"] = _lyricsAlignment.ToString();
 
             settingsJson["Lyrics-Settings"] = lyricsSettings;
 
@@ -147,7 +149,7 @@ namespace MusicBeePlugin
 
             _bgColor = GetSkinPanelBackgroundColor();
             lrcSettings = new LRCSettings(
-                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor)
+                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor, _lyricsAlignment)
             {
                 Dock = DockStyle.Fill
             };
@@ -180,6 +182,17 @@ namespace MusicBeePlugin
                 {
                     _lyricsViewControl?.SetActiveColor(
                         _useCustomColor ? _activeColor : Color.Black);
+                });
+            };
+
+            lrcSettings.LyricsAlignmentChanged += alignment =>
+            {
+                _lyricsAlignment = alignment;
+                SaveSettings();
+
+                RunOnUiThreadYouMf(() =>
+                {
+                    _lyricsViewControl?.SetLyricsAlignment(_lyricsAlignment);
                 });
             };
 
@@ -230,6 +243,7 @@ namespace MusicBeePlugin
             _lyricsViewControl.BackColor = bgColor;
 
             _lyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
+            _lyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
 
             _lyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
 
@@ -453,6 +467,15 @@ namespace MusicBeePlugin
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
             _useCustomColor = Settings.Value<bool?>("UseCustomColor") ?? false;
+
+            string savedAlignment = Settings.Value<string>("LyricsAlignment");
+            if (Enum.TryParse(savedAlignment, true, out StringAlignment alignment) &&
+                (alignment == StringAlignment.Near ||
+                 alignment == StringAlignment.Center ||
+                 alignment == StringAlignment.Far))
+            {
+                _lyricsAlignment = alignment;
+            }
 
             string savedStyle = Settings.Value<string>("FontStyle") ?? "Regular";
             if (Enum.TryParse(savedStyle, out FontStyle style))

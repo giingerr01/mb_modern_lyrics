@@ -34,6 +34,7 @@ namespace MusicBeePlugin
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
         private Color _backColor = Color.White;
+        private StringAlignment _lyricsAlignment = StringAlignment.Center;
 
         private SolidBrush _activeBrush;
         private SolidBrush _inactiveBrush;
@@ -125,6 +126,25 @@ namespace MusicBeePlugin
 
             _layoutDirty = true;
             _animTimer.Stop();
+            Invalidate();
+        }
+
+        public void SetLyricsAlignment(StringAlignment alignment)
+        {
+            if (alignment != StringAlignment.Near &&
+                alignment != StringAlignment.Center &&
+                alignment != StringAlignment.Far)
+            {
+                throw new ArgumentOutOfRangeException(nameof(alignment));
+            }
+
+            if (_lyricsAlignment == alignment)
+            {
+                return;
+            }
+
+            _lyricsAlignment = alignment;
+            _lineFormat.Alignment = alignment;
             Invalidate();
         }
 
