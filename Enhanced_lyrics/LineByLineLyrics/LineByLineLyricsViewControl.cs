@@ -71,6 +71,10 @@ namespace MusicBeePlugin
         public void SetInActiveColor(Color color)
         {
             _inactiveColor = color;
+
+            _inactiveBrush.Dispose();
+
+            _inactiveBrush = new SolidBrush((_inactiveColor));
             Invalidate();
         }
 
@@ -228,6 +232,43 @@ namespace MusicBeePlugin
             _layoutDirty = false;
         }
 
+        private Color BlendingThisBitch(Color foreground, Color background, float amount)
+        {
+            amount = Math.Max(0f, Math.Min(1f, amount));
+            int r = (int)(background.R + (foreground.R - background.R) * amount);
+            int g = (int)(background.G + (foreground.G - background.G) * amount);
+            int b = (int)(background.B + (foreground.B - background.B) * amount);
+
+            return Color.FromArgb(r, g, b);
+        }
+
+        private Color GetInactiveLineColor(int index)
+        {
+            if (_currentIndex < 0)
+            {
+                return _inactiveColor;
+            }
+            int distance = Math.Abs(index - _currentIndex);
+
+            float dimAmount;
+            switch (distance)
+            {
+                case 1:
+                    dimAmount = 0.25f;
+                    break;
+                case 2:
+                    dimAmount = 0.45f;
+                    break;
+                case 3:
+                    dimAmount = 0.60f;
+                    break;
+                default:
+                    dimAmount = 0.75f;
+                    break;
+            }
+            return BlendingThisBitch(_inactiveColor, BackColor, dimAmount);
+        }
+
         private float MaxScroll()
         {
             return Math.Max(0, _totalHeight - ClientSize.Height);
@@ -345,10 +386,30 @@ namespace MusicBeePlugin
                 bool isActive = synced && i == _currentIndex;
                 var rect = new RectangleF(HorizontalPadding, y, width, _heights[i] + LineGap);
 
-                g.DrawString(text,
-                    isActive ? _activeFont : _inactiveFont,
-                    isActive ? _activeBrush : _inactiveBrush,
-                    rect, _lineFormat);
+                if (isActive)
+                {
+                    g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
+                    Logger.Log("isActive drawn!!");
+                }
+                else if (synced && _currentIndex >= 0)
+                {
+                    using (SolidBrush dimmedBrush = new SolidBrush(GetInactiveLineColor(i)))
+                    {
+                        g.DrawString(text, _inactiveFont, dimmedBrush, rect, _lineFormat);
+                        Logger.Log("dimmed!");
+                    }
+                }
+                else
+                {
+
+                    Logger.Log("LastResort!!");
+                    g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
+                }
+
+                // g.DrawString(text,
+                // isActive ? _activeFont : _inactiveFont,
+                // isActive ? _activeBrush : _inactiveBrush,
+                // rect, _lineFormat);
             }
         }
 
