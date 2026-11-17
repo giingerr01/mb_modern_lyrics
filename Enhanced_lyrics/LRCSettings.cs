@@ -17,17 +17,27 @@ namespace MusicBeePlugin.Enhanced_lyrics
     //         ElementComponent.ComponentBackground));
     public partial class LRCSettings : UserControl
     {
-        private String _font = "Lucida Sans";
+        private string _font = "Lucida Sans";
         private int _fontSize = 10;
         private FontStyle _fontStyle = FontStyle.Regular;
         private Color _activeColor = Color.Black;
+        private Color _defaultCheckBoxForeColor;
+        private bool _initializing;
         public event Action<string, int, FontStyle> FontSelectionChanged;
-        public event Action<Color> ActiveColorChanged;
+        public event Action<Color, bool> ActiveColorChanged;
 
 
-        public LRCSettings(string font, int fontSize, Color bgColor, FontStyle fontStyle)
+        public LRCSettings(
+            string font,
+            int fontSize,
+            Color bgColor,
+            FontStyle fontStyle,
+            Color activeColor,
+            bool useCustomColor
+            )
         {
             InitializeComponent();
+            _defaultCheckBoxForeColor = CustomColorCheckBox.ForeColor;
             this.BackColor = bgColor;
             LyricsLabel.BackColor = Color.Transparent;
             fontSizeBox.BackColor = bgColor;
@@ -36,7 +46,15 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _font = font;
             _fontSize = fontSize;
             _fontStyle = fontStyle;
+            _activeColor = activeColor;
             fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+
+            _initializing = true;
+            CustomColorCheckBox.Checked = useCustomColor;
+            CustomColorCheckBox.ForeColor = useCustomColor
+                ? activeColor
+                : _defaultCheckBoxForeColor;
+            _initializing = false;
         }
 
         private void LRCSettings_Load(object sender, EventArgs e)
@@ -75,6 +93,11 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private void CustomColorCheckBox_CheckedChanged(object sender, EventArgs e)
         {
+            if (_initializing)
+            {
+                return;
+            }
+
             if (CustomColorCheckBox.Checked)
             {
                 using (ColorDialog colorDialog = new ColorDialog())
@@ -85,19 +108,22 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     if (colorDialog.ShowDialog() == DialogResult.OK)
                     {
                         _activeColor = colorDialog.Color;
-                        ActiveColorChanged?.Invoke(_activeColor);
+                        CustomColorCheckBox.ForeColor = _activeColor;
+                        ActiveColorChanged?.Invoke(_activeColor, true);
                     }
                     else
                     {
+                        _initializing = true;
                         CustomColorCheckBox.Checked = false;
-
+                        CustomColorCheckBox.ForeColor = _defaultCheckBoxForeColor;
+                        _initializing = false;
                     }
                 }
             }
             else
             {
-                _activeColor = Color.Black;
-                ActiveColorChanged?.Invoke(_activeColor);
+                CustomColorCheckBox.ForeColor = _defaultCheckBoxForeColor;
+                ActiveColorChanged?.Invoke(_activeColor, false);
             }
 
         }
