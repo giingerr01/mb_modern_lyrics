@@ -16,23 +16,21 @@ namespace MusicBeePlugin
     {
 
 
-        private MusicBeeApiInterface mbApiInterface;
-        private PluginInfo about = new PluginInfo();
-
-        private LyricsViewControl _lyricsViewControl;
-        private JObject Settings { get; set; } = new JObject();
+        private int _fontSize = 10;
         private Control _dockablePanel;
         private LRCSettings lrcSettings;
-        private System.Timers.Timer _positionTimer;
-        private ParsedLyrics _currentLyrics = new ParsedLyrics();
-
-        private int _fontSize = 10;
         private string _font = "Lucida Sans";
-        private FontStyle _fontStyle = FontStyle.Regular;
+        private Color _bgColor = Color.White;
         private bool _useCustomColor = false;
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
-        private Color _bgColor = Color.White;
+        private System.Timers.Timer _positionTimer;
+        private PluginInfo about = new PluginInfo();
+        private MusicBeeApiInterface mbApiInterface;
+        private LyricsViewControl _lyricsViewControl;
+        private FontStyle _fontStyle = FontStyle.Regular;
+        private JObject Settings { get; set; } = new JObject();
+        private ParsedLyrics _currentLyrics = new ParsedLyrics();
         private StringAlignment _lyricsAlignment = StringAlignment.Center;
 
         public PluginInfo Initialise(IntPtr apiInterfacePtr)
@@ -61,19 +59,18 @@ namespace MusicBeePlugin
                     Logger.Log("Error while reading: " + ex.Message);
                 }
             }
-
+            //assining the path for the logge as the same folder for the settings folder
             Logger.FilePath = Path.Combine(LRCSettingsFolder, "LrcSettingsLog.log");
-
 
             JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject
             ?? new JObject();
             Settings = lyricsSettings;
             LoadSettings();
             about.PluginInfoVersion = 1;
-            about.Name = "LRC Lyrics";
+            about.Name = "ELRC Lyrics";
             about.Description = "Line-by-line synchronized (LRC) lyrics panel.";
             about.Author = "giingerr01";
-            about.TargetApplication = "LRC Lyrics";
+            about.TargetApplication = "ELRC Lyrics";
             about.Type = PluginType.PanelView;
             about.VersionMajor = 1;
             about.VersionMinor = 1;
@@ -82,10 +79,8 @@ namespace MusicBeePlugin
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
             about.ConfigurationPanelHeight = 90;
-
             return about;
         }
-
 
         public void SaveSettings()
         {
@@ -95,9 +90,7 @@ namespace MusicBeePlugin
             string settingsPath = mbApiInterface.Setting_GetPersistentStoragePath();
             string LRCSettingsFolder = Path.Combine(settingsPath, "LrcSettings");
             Directory.CreateDirectory(LRCSettingsFolder);
-
             string jsonFilePath = Path.Combine(LRCSettingsFolder, "LrcSettings.json");
-
             JObject settingsJson = new JObject();
 
             if (File.Exists(jsonFilePath))
@@ -112,7 +105,6 @@ namespace MusicBeePlugin
 
                 }
             }
-
             JObject lyricsSettings = settingsJson["Lyrics-Settings"] as JObject ?? new JObject();
 
             // property to be saved
@@ -123,6 +115,7 @@ namespace MusicBeePlugin
             lyricsSettings["UseCustomColor"] = _useCustomColor;
             lyricsSettings["LyricsAlignment"] = _lyricsAlignment.ToString();
 
+            //attach the root
             settingsJson["Lyrics-Settings"] = lyricsSettings;
 
             File.WriteAllText(jsonFilePath, settingsJson.ToString(Formatting.Indented));
@@ -130,8 +123,6 @@ namespace MusicBeePlugin
             //log success
             Logger.Log("Settings Saved!! IN Settings FIle");
         }
-
-
         public bool Configure(IntPtr panelHandle)
         {
             if (panelHandle == IntPtr.Zero)
@@ -209,7 +200,7 @@ namespace MusicBeePlugin
                 return 0;
             }
 
-            //these three lines has caused me so much problem
+            // Non-presence of these three lines has caused me so much Pain;
             try
             {
                 if (panel.InvokeRequired)
@@ -243,6 +234,7 @@ namespace MusicBeePlugin
             _lyricsViewControl.BackColor = bgColor;
 
             _lyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
+
             _lyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
 
             _lyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
@@ -268,6 +260,7 @@ namespace MusicBeePlugin
             return 0;   // < 0: resizable, fills the space the panel is docked to
         }
 
+        //get skin fore  color for the texts 
         private Color GetSkinPanelBackgroundColor()
         {
             return Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
@@ -345,7 +338,7 @@ namespace MusicBeePlugin
             // _lyricsViewControl?.SetLyrics(_currentLyrics);
         }
 
-        // song.flac -> song.lrc next to it
+        // song.flac -> song.lrc  get the file path of the song from api and change the songs title's extension to to .lrc that is next to it next to it
         private string ReadSidecarLrc()
         {
             try
@@ -356,6 +349,7 @@ namespace MusicBeePlugin
                     return null;
                 }
 
+                //chaingign extension
                 string lrcPath = Path.ChangeExtension(url, ".lrc");
                 return File.Exists(lrcPath) ? File.ReadAllText(lrcPath) : null;
             }
@@ -395,7 +389,7 @@ namespace MusicBeePlugin
 
         private void PositionTimer_Elapsed(object sender, EventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("<PositionTimer_Elapsed()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
+            // System.Diagnostics.Debug.WriteLine("<PositionTimer_Elapsed()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
             var uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
             if (uiControl == null || uiControl.IsDisposed || !uiControl.IsHandleCreated)
             {
@@ -464,6 +458,7 @@ namespace MusicBeePlugin
 
         private void LoadSettings()
         {
+            //loaded settings
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
             _useCustomColor = Settings.Value<bool?>("UseCustomColor") ?? false;
