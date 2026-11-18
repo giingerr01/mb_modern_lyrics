@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
@@ -8,40 +7,31 @@ namespace MusicBeePlugin
 {
     public class LyricsViewControl : UserControl
     {
-        private const int HorizontalPadding = 24;
-        private const int LineGap = 1;
-        private const float WheelStep = 30f;
 
-        //a readonly array for the brushes to eleminate the switch(cases)
-        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
-        private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
-        private int _currentIndex = -1;
-
-        // layout
-        private float[] _tops = new float[0];
-        private float[] _heights = new float[0];
-        private float _totalHeight;
-        private bool _layoutDirty = true;
-
-        // scrolling
         private float _scrollY;
         private float _targetY;
-        private readonly Timer _animTimer;
-
         private Font _activeFont;
-        private Font _inactiveFont;
         private int _fontSize = 10;
+        private float _totalHeight;
+        private Font _inactiveFont;
+        private const int LineGap = 1;
+        private int _currentIndex = -1;
+        private SolidBrush _activeBrush;
+        private bool _layoutDirty = true;
+        private SolidBrush _inactiveBrush;
+        private readonly Timer _animTimer;
+        private const float WheelStep = 30f;
         private string _font = "Lucida Sans";
-        private FontStyle _fontStyle = FontStyle.Regular;
-
-        private ParsedLyrics _lyrics = new ParsedLyrics();
-
+        private float[] _tops = new float[0];
+        private float[] _heights = new float[0];
+        private const int HorizontalPadding = 24;
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
+        private FontStyle _fontStyle = FontStyle.Regular;
+        private ParsedLyrics _lyrics = new ParsedLyrics();
         private StringAlignment _lyricsAlignment = StringAlignment.Center;
-
-        private SolidBrush _activeBrush;
-        private SolidBrush _inactiveBrush;
+        private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
+        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -107,13 +97,13 @@ namespace MusicBeePlugin
 
         public void SetFontSize(int fontSize, string font, FontStyle fontStyle)
         {
-            _fontSize = Math.Max(8, Math.Min(72, fontSize));
+            int ClampedSize = Math.Max(8, Math.Min(72, fontSize));
             if (_font == font && _fontSize == fontSize && _fontStyle == fontStyle)
             {
                 return;
             }
             _font = font ?? _font;
-            _fontSize = fontSize;
+            _fontSize = ClampedSize;
             _fontStyle = fontStyle;
 
             _activeFont.Dispose();
@@ -182,8 +172,10 @@ namespace MusicBeePlugin
         {
             Graphics g = e.Graphics;
             g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
-            g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know, will remove at some point, we are not going to add any shape in lyrics panel
+
+            // g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know, will remove at some point, we are not going to add any shape in lyrics panel
             // using TextRenderingHint as bcz comparing the Builtin lyrics panel and This pluigin they look same so yeahh.
+
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
