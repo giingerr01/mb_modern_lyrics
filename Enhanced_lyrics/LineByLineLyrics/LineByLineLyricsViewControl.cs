@@ -233,11 +233,15 @@ namespace MusicBeePlugin
 
         private void RebuildDimBrushes()
         {
-            for (int i = 0; i < _dimBrushes.Length; i++)
+            float[] dimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
+            for (int i = 0; i < 7; i++)
             {
-                _dimBrushes[i]?.Dispose();
-                _dimBrushes[i] = new SolidBrush(BlendingThisBitch(_inactiveColor, BackColor,
-                DimAmountForDistance(i + 1)));
+                if (_dimBrushes[i] != null)
+                {
+                    _dimBrushes[i].Dispose();
+                }
+                Color blended = BlendingThisBitch(_inactiveColor, BackColor, dimAmounts[i]);
+                _dimBrushes[i] = new SolidBrush(blended);
             }
         }
 
@@ -411,7 +415,7 @@ namespace MusicBeePlugin
                 {
                     using (SolidBrush dimmedBrush = new SolidBrush(GetInactiveLineColor(i)))
                     {
-                        g.DrawString(text, _inactiveFont, _dimBrushes[Math.Min(6, Math.Abs(i - _currentIndex))], rect, _lineFormat);
+                        g.DrawString(text, _inactiveFont, _dimBrushes[brushIndex], rect, _lineFormat);
                     }
                 }
                 else
