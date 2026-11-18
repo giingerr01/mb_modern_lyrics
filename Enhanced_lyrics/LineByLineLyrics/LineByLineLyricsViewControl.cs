@@ -40,6 +40,7 @@ namespace MusicBeePlugin
 
         private SolidBrush _activeBrush;
         private SolidBrush _inactiveBrush;
+        private readonly SolidBrush[] _dimBrushes = new SolidBrush[7];
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -110,16 +111,12 @@ namespace MusicBeePlugin
 
         public void SetFontSize(int fontSize, string font, FontStyle fontStyle)
         {
-            if (fontSize < 8 || fontSize > 72)
-            {
-                throw new ArgumentOutOfRangeException(nameof(fontSize));
-            }
-
+            _fontSize = Math.Max(8, Math.Min(72, fontSize));
             if (_font == font && _fontSize == fontSize && _fontStyle == fontStyle)
             {
                 return;
             }
-            _font = font;
+            _font = font ?? _font;
             _fontSize = fontSize;
             _fontStyle = fontStyle;
 
@@ -234,6 +231,16 @@ namespace MusicBeePlugin
             _layoutDirty = false;
         }
 
+        private void RebuildDimBrushes()
+        {
+            for (int i = 0; i < _dimBrushes.Length; i++)
+            {
+                _dimBrushes[i]?.Dispose();
+                _dimBrushes[i] = new SolidBrush(BlendingThisBitch(_inactiveColor, BackColor,
+                DimAmountForDistance(i + 1)));
+            }
+        }
+
         private Color BlendingThisBitch(Color foreground, Color background, float visibility)
         {
             float minFloor = 0f;
@@ -254,33 +261,28 @@ namespace MusicBeePlugin
                 return _inactiveColor;
             }
             int distance = Math.Abs(index - _currentIndex);
+            return BlendingThisBitch(_inactiveColor, BackColor, DimAmountForDistance(distance));
+        }
 
-            float dimAmount;
+        private float DimAmountForDistance(int distance)
+        {
             switch (distance)
             {//Future work is not use switch and use animatioon for it but i will apply it when i learn more about tit.
                 case 1:
-                    dimAmount = 0.90f;
-                    break;
+                    return 0.90f;
                 case 2:
-                    dimAmount = 0.75f;
-                    break;
+                    return 0.75f;
                 case 3:
-                    dimAmount = 0.60f;
-                    break;
+                    return 0.60f;
                 case 4:
-                    dimAmount = 0.45f;
-                    break;
+                    return 0.45f;
                 case 5:
-                    dimAmount = 0.30f;
-                    break;
+                    return 0.30f;
                 case 6:
-                    dimAmount = 0.15f;
-                    break;
+                    return 0.15f;
                 default:
-                    dimAmount = 0.10f;
-                    break;
+                    return 0.10f;
             }
-            return BlendingThisBitch(_inactiveColor, BackColor, dimAmount);
         }
 
         private float MaxScroll()
@@ -358,8 +360,9 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias; // avoid Antialias bcz it can render text not very clean sharp
-            // using SmootingMode as bcz the comparing the Builtin and This pluigin they look same so yeahh.
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know will remove it in some point, we are not going to add any shape in lyrics panel
+            // using TextRenderingHint as bcz the comparing the Builtin and This pluigin they look same so yeahh.
             g.Clear(BackColor);
 
             if (_lyrics.Lines.Count == 0)
@@ -403,20 +406,17 @@ namespace MusicBeePlugin
                 if (isActive)
                 {
                     g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
-                    Logger.Log("isActive drawn!!");
                 }
                 else if (synced && _currentIndex >= 0)
                 {
                     using (SolidBrush dimmedBrush = new SolidBrush(GetInactiveLineColor(i)))
                     {
-                        g.DrawString(text, _inactiveFont, dimmedBrush, rect, _lineFormat);
-                        Logger.Log("dimmed!");
+                        g.DrawString(text, _inactiveFont, _dimBrushes[Math.Min(6, Math.Abs(i - _currentIndex))], rect, _lineFormat);
                     }
                 }
                 else
                 {
 
-                    Logger.Log("LastResort!!");
                     g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
                 }
 
