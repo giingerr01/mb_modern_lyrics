@@ -2,7 +2,10 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
+using System.Net.Configuration;
 using System.Numerics;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin.Enhanced_lyrics
@@ -23,7 +26,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private float _scrollY;
 
         private Font _activeFont = new Font("Comic Sans", 12, FontStyle.Bold);
-        private Font _inactive = new Font("Comic Sans", 11, FontStyle.Regular);
+        private Font _inactiveFont = new Font("Comic Sans", 11, FontStyle.Regular);
 
         private SolidBrush _activeBrush = new SolidBrush(Color.DodgerBlue);
         private SolidBrush _inactiveBrush = new SolidBrush(Color.DimGray);
@@ -55,7 +58,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         public void UpdatePosition(TimeSpan position)
         {
-            _currentIndex = position;
+            _currentPosition = position;
 
             if (!_lyrics.IsSynchronized || _lyrics.Lines.Count == 0)
             {
@@ -91,8 +94,9 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 {
                     hi = mid - 1;
                 }
-                return result;
             }
+
+            return result;
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -131,7 +135,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     }
                     else
                     {
-                        g.DrawString(text, _inactive, _inactiveBrush, rect, _lineFormat);
+                        g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
                     }
                 }
             }
@@ -147,13 +151,69 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 totalMs = 1;
             }
 
-            double elapsedMs = (_currentPosition - line.StartTime)
+            double elapsedMs = (_currentPosition - line.StartTime).TotalMilliseconds;
 
+            float progress = (float)(elapsedMs / totalMs);
 
+            //clamping between 0 to 1
+            progress = Math.Max(0f, Math.Min(1f, progress));
+
+            g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
+            if (progress > 0f)
+            {
+                //mesure the size of the text to decide hwo wide is the seeep should be
+
+                SizeF textSize = g.MeasureString(text, _activeFont, Math.Max(1, (int)Math.Ceiling(rect.Width)), _lineFormat);
+
+                float widthOfSweep = textSize.Width * progress;
+
+                float startX = rect.X + (rect.Width - textSize.Width) / 2f;
+
+                //width of the sweep mask
+                RectangleF sweepRect = new RectangleF(startX, rect.Y, widthOfSweep, rect.Height);
+
+                //here saving the state and apply and restroe
+                GraphicsState state = g.Save();
+                g.SetClip(sweepRect, CombineMode.Intersect);
+                g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
+                g.Restore(state);
+            }
         }
 
+        private void EnsureLayout(Graphics g)
+        {
+            int width = Math.Max(1, ClientSize.Width - HorizontalPadding * 2);
+            int count = _lyrics.Lines.Count;
+            _tops = new float[count];
+            _heights = new float[count];
 
+            float y = 0;
+            for (int i = 0; i < count; i++)
+            {
+                float h = g.MeasureString(_lyrics.Lines[i].Text, _activeFont, width, _lineFormat).Height;
+                _tops[i] = y;
+                _heights[i] = h;
+                y += h + LineGap;
+            }
 
+            if (_currentIndex >= 0 && _currentIndex < count)
+            {
+                _scrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _activeFont?.Dispose();
+                _activeBrush?.Dispose();
+                _inactiveBrush?.Dispose();
+                _inactiveFont?.Dispose();
+                _lineFormat?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
 
     }
 }
