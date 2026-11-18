@@ -2,7 +2,6 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-using System.IO.Compression;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin
@@ -12,6 +11,10 @@ namespace MusicBeePlugin
         private const int HorizontalPadding = 24;
         private const int LineGap = 1;
         private const float WheelStep = 30f;
+
+        //a readonly array for the brushes to eleminate the switch(cases)
+        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
+        private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
         private int _currentIndex = -1;
 
         // layout
@@ -35,12 +38,10 @@ namespace MusicBeePlugin
 
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
-        private Color _backColor = Color.White;
         private StringAlignment _lyricsAlignment = StringAlignment.Center;
 
         private SolidBrush _activeBrush;
         private SolidBrush _inactiveBrush;
-        private readonly SolidBrush[] _dimBrushes = new SolidBrush[7];
 
         // wrapped, horizontally centered lines
         private readonly StringFormat _lineFormat = new StringFormat
@@ -57,30 +58,6 @@ namespace MusicBeePlugin
             LineAlignment = StringAlignment.Center
         };
 
-        private void IntializeFonts()
-        {
-            _activeFont = new Font(_font, _fontSize, _fontStyle);
-            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), _fontStyle);
-        }
-
-        public void SetActiveColor(Color color)
-        {
-            _activeColor = color;
-            _activeBrush.Dispose();
-            _activeBrush = new SolidBrush(_activeColor);
-            Invalidate();
-        }
-
-        public void SetInActiveColor(Color color)
-        {
-            _inactiveColor = color;
-
-            _inactiveBrush.Dispose();
-
-            _inactiveBrush = new SolidBrush((_inactiveColor));
-            Invalidate();
-        }
-
         public LyricsViewControl()
         {
             IntializeFonts();
@@ -92,10 +69,29 @@ namespace MusicBeePlugin
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw, true);
             this.UpdateStyles();
-            BackColor = _backColor;
+            BackColor = Color.White;
+            RebuildDimBrushes();
 
             _animTimer = new Timer { Interval = 15 };
             _animTimer.Tick += AnimTimer_Tick;
+        }
+
+        //set active color dispose and make one again
+        public void SetActiveColor(Color color)
+        {
+            _activeColor = color;
+            _activeBrush.Dispose();
+            _activeBrush = new SolidBrush(_activeColor);
+            Invalidate();
+        }
+
+        public void SetInActiveColor(Color color)
+        {
+            _inactiveColor = color;
+            _inactiveBrush.Dispose();
+            _inactiveBrush = new SolidBrush(_inactiveColor);
+            RebuildDimBrushes();
+            Invalidate();
         }
 
         public void SetLyrics(ParsedLyrics lyrics)
@@ -172,7 +168,7 @@ namespace MusicBeePlugin
 
             _targetY = ComputeTarget();
 
-            // big jump (seeking): don't scroll through the whole song
+            // big jump seeking dont scroll through the whole song
             if (Math.Abs(_targetY - _scrollY) > ClientSize.Height * 2f)
             {
                 _scrollY = _targetY;
@@ -180,6 +176,78 @@ namespace MusicBeePlugin
 
             _animTimer.Start();
             Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know, will remove at some point, we are not going to add any shape in lyrics panel
+            // using TextRenderingHint as bcz comparing the Builtin lyrics panel and This pluigin they look same so yeahh.
+            g.Clear(BackColor);
+
+            if (_lyrics.Lines.Count == 0)
+            {
+                g.DrawString("No Lyrics Available", _inactiveFont, _inactiveBrush, ClientRectangle, _messageFormat);
+                return;
+            }
+
+            if (_layoutDirty)
+            {
+                EnsureLayout(g);
+                _targetY = ComputeTarget();
+                _scrollY = _targetY;   // snap after new lyrics / resize
+            }
+
+            int width = Math.Max(1, ClientSize.Width - HorizontalPadding * 2);
+            bool synced = _lyrics.IsSynchronized;
+
+            for (int i = 0; i < _lyrics.Lines.Count; i++)
+            {
+                int distance = Math.Abs(i - _currentIndex);
+                int brushIndex = Math.Max(0, Math.Min(distance - 1, _dimBrushes.Length - 1));
+                {
+                    float y = _tops[i] - _scrollY;
+
+                    if (y + _heights[i] < 0)
+                    {
+                        continue;
+                    }
+                    if (y > ClientSize.Height)
+                    {
+                        break;
+                    }
+
+                    string text = _lyrics.Lines[i].Text;
+                    if (text.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    bool isActive = synced && i == _currentIndex;
+                    var rect = new RectangleF(HorizontalPadding, y, width, _heights[i] + LineGap);
+
+                    if (isActive)
+                    {
+                        g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
+                    }
+                    else if (synced && _currentIndex >= 0)
+                    {
+                        // use _dimbrushes from the array we declared
+                        //                                        |
+                        g.DrawString(text, _inactiveFont, _dimBrushes[brushIndex], rect, _lineFormat);
+                    }
+                    else
+                    {
+                        g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
+                    }
+
+                    // g.DrawString(text,
+                    // isActive ? _activeFont : _inactiveFont,
+                    // isActive ? _activeBrush : _inactiveBrush,
+                    // rect, _lineFormat);
+                }
+            }
         }
 
         // index of the last line whose StartTime <= position, or -1 before the first line
@@ -231,64 +299,6 @@ namespace MusicBeePlugin
             _layoutDirty = false;
         }
 
-        private void RebuildDimBrushes()
-        {
-            float[] dimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
-            for (int i = 0; i < 7; i++)
-            {
-                if (_dimBrushes[i] != null)
-                {
-                    _dimBrushes[i].Dispose();
-                }
-                Color blended = BlendingThisBitch(_inactiveColor, BackColor, dimAmounts[i]);
-                _dimBrushes[i] = new SolidBrush(blended);
-            }
-        }
-
-        private Color BlendingThisBitch(Color foreground, Color background, float visibility)
-        {
-            float minFloor = 0f;
-            float maxAlpha = 1f;
-            visibility = Math.Max(minFloor, Math.Min(maxAlpha, visibility));
-
-            int r = (int)(background.R + (foreground.R - background.R) * visibility);
-            int g = (int)(background.G + (foreground.G - background.G) * visibility);
-            int b = (int)(background.B + (foreground.B - background.B) * visibility);
-
-            return Color.FromArgb(r, g, b);
-        }
-
-        private Color GetInactiveLineColor(int index)
-        {
-            if (_currentIndex < 0)
-            {
-                return _inactiveColor;
-            }
-            int distance = Math.Abs(index - _currentIndex);
-            return BlendingThisBitch(_inactiveColor, BackColor, DimAmountForDistance(distance));
-        }
-
-        private float DimAmountForDistance(int distance)
-        {
-            switch (distance)
-            {//Future work is not use switch and use animatioon for it but i will apply it when i learn more about tit.
-                case 1:
-                    return 0.90f;
-                case 2:
-                    return 0.75f;
-                case 3:
-                    return 0.60f;
-                case 4:
-                    return 0.45f;
-                case 5:
-                    return 0.30f;
-                case 6:
-                    return 0.15f;
-                default:
-                    return 0.10f;
-            }
-        }
-
         private float MaxScroll()
         {
             return Math.Max(0, _totalHeight - ClientSize.Height);
@@ -297,6 +307,7 @@ namespace MusicBeePlugin
         private float ClampScroll(float value)
         {
             // -10 is to the gap size between the firs line of lyircs from the celieng of the LRC panle
+            // at rest. on startup
             return Math.Max(-10, Math.Min(MaxScroll(), value));
         }
 
@@ -310,11 +321,38 @@ namespace MusicBeePlugin
 
             int i = Math.Max(_currentIndex, 0);
 
-            /// its been crazy here chattth puja is almost ending and here i am doing nothing and writeing this useless plugin
-            //  dekhthe hai kya hota h
 
             /// clamp the top line so the top part doesnt show show blacnk Panle 
             return ClampScroll(_tops[i] + _heights[i] / 2f - ClientSize.Height / 2f);
+        }
+
+        /// its been crazy here chatth puja is almost ending and here i am doing nothing and writeing this useless plugin
+        //  dekhthe hai kya hota h
+
+        private void IntializeFonts()
+        {
+            _activeFont = new Font(_font, _fontSize, _fontStyle);
+            _inactiveFont = new Font(_font, Math.Max(9, _fontSize - 1), _fontStyle);
+        }
+
+        private void RebuildDimBrushes()
+        {
+            for (int i = 0; i < DimAmounts.Length; i++)
+            {
+                _dimBrushes[i]?.Dispose();
+                _dimBrushes[i] = new SolidBrush(BlendColors(_inactiveColor, BackColor, DimAmounts[i]));
+            }
+        }
+
+        private static Color BlendColors(Color foreground, Color background, float visibility)
+        {
+            visibility = Math.Max(0f, Math.Min(1f, visibility));
+
+            int r = (int)(background.R + (foreground.R - background.R) * visibility);
+            int g = (int)(background.G + (foreground.G - background.G) * visibility);
+            int b = (int)(background.B + (foreground.B - background.B) * visibility);
+
+            return Color.FromArgb(r, g, b);
         }
 
         private void AnimTimer_Tick(object sender, EventArgs e)
@@ -361,73 +399,12 @@ namespace MusicBeePlugin
             Invalidate();
         }
 
-        protected override void OnPaint(PaintEventArgs e)
+        protected override void OnBackColorChanged(EventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
-            g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know will remove it in some point, we are not going to add any shape in lyrics panel
-            // using TextRenderingHint as bcz the comparing the Builtin and This pluigin they look same so yeahh.
-            g.Clear(BackColor);
-
-            if (_lyrics.Lines.Count == 0)
+            base.OnBackColorChanged(e);
+            if (_inactiveBrush != null)
             {
-                g.DrawString("No Lyrics Available", _inactiveFont, _inactiveBrush, ClientRectangle, _messageFormat);
-                return;
-            }
-
-            if (_layoutDirty)
-            {
-                EnsureLayout(g);
-                _targetY = ComputeTarget();
-                _scrollY = _targetY;   // snap after new lyrics / resize
-            }
-
-            int width = Math.Max(1, ClientSize.Width - HorizontalPadding * 2);
-            bool synced = _lyrics.IsSynchronized;
-
-            for (int i = 0; i < _lyrics.Lines.Count; i++)
-            {
-                float y = _tops[i] - _scrollY;
-
-                if (y + _heights[i] < 0)
-                {
-                    continue;
-                }
-                if (y > ClientSize.Height)
-                {
-                    break;
-                }
-
-                string text = _lyrics.Lines[i].Text;
-                if (text.Length == 0)
-                {
-                    continue;
-                }
-
-                bool isActive = synced && i == _currentIndex;
-                var rect = new RectangleF(HorizontalPadding, y, width, _heights[i] + LineGap);
-
-                if (isActive)
-                {
-                    g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
-                }
-                else if (synced && _currentIndex >= 0)
-                {
-                    using (SolidBrush dimmedBrush = new SolidBrush(GetInactiveLineColor(i)))
-                    {
-                        g.DrawString(text, _inactiveFont, _dimBrushes[brushIndex], rect, _lineFormat);
-                    }
-                }
-                else
-                {
-
-                    g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
-                }
-
-                // g.DrawString(text,
-                // isActive ? _activeFont : _inactiveFont,
-                // isActive ? _activeBrush : _inactiveBrush,
-                // rect, _lineFormat);
+                RebuildDimBrushes();
             }
         }
 
@@ -443,6 +420,10 @@ namespace MusicBeePlugin
                 _inactiveBrush.Dispose();
                 _lineFormat.Dispose();
                 _messageFormat.Dispose();
+                foreach (SolidBrush brush in _dimBrushes)//disposing the _dimbrushes on a loop so it removes all 7 brushes each holding diff opacity values in the _dimBrushes Array
+                {
+                    brush?.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
