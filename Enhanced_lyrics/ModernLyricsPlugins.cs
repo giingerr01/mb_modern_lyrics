@@ -489,11 +489,9 @@ namespace MusicBeePlugin
                 try
                 {
                     _activeColor = ColorTranslator.FromHtml(savedColor);
-                    Logger.Log("Color Successfully got!!");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    Logger.Log("Error Loading active color: " + ex.Message);
                     _activeColor = Color.Black;
                 }
             }
