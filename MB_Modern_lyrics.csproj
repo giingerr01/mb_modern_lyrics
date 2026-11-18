@@ -95,6 +95,9 @@
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\LineByLineLyricsViewControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Enhanced_lyrics\LineByLineLyrics\SweepLyricsViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Models\LineByLineLyricsModels.cs" />
     <Compile Include="Enhanced_lyrics\LRCSettings.cs">
       <SubType>UserControl</SubType>
