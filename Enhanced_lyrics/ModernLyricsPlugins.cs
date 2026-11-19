@@ -29,6 +29,7 @@ namespace MusicBeePlugin
         private MusicBeeApiInterface mbApiInterface;
         private SweepLyricsViewControl _sweepLyricsViewControl;
         private FontStyle _fontStyle = FontStyle.Regular;
+        private bool _enableSweepAnimation = true;
         private JObject Settings { get; set; } = new JObject();
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
         private StringAlignment _lyricsAlignment = StringAlignment.Center;
@@ -78,7 +79,7 @@ namespace MusicBeePlugin
             about.MinInterfaceVersion = MinInterfaceVersion;
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
-            about.ConfigurationPanelHeight = 90;
+            about.ConfigurationPanelHeight = 120;
             return about;
         }
 
@@ -114,6 +115,7 @@ namespace MusicBeePlugin
             lyricsSettings["FontStyle"] = _fontStyle.ToString();
             lyricsSettings["UseCustomColor"] = _useCustomColor;
             lyricsSettings["LyricsAlignment"] = _lyricsAlignment.ToString();
+            lyricsSettings["EnableSweepAnimation"] = _enableSweepAnimation;
 
             //attach the root
             settingsJson["Lyrics-Settings"] = lyricsSettings;
@@ -140,7 +142,8 @@ namespace MusicBeePlugin
 
             _bgColor = GetSkinPanelBackgroundColor();
             lrcSettings = new LRCSettings(
-                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor, _lyricsAlignment)
+                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor,
+                _lyricsAlignment, _enableSweepAnimation)
             {
                 Dock = DockStyle.Fill
             };
@@ -184,6 +187,17 @@ namespace MusicBeePlugin
                 RunOnUiThreadYouMf(() =>
                 {
                     _sweepLyricsViewControl?.SetLyricsAlignment(_lyricsAlignment);
+                });
+            };
+
+            lrcSettings.SweepAnimationChanged += enabled =>
+            {
+                _enableSweepAnimation = enabled;
+                SaveSettings();
+
+                RunOnUiThreadYouMf(() =>
+                {
+                    _sweepLyricsViewControl?.SetSweepAnimationEnabled(_enableSweepAnimation);
                 });
             };
 
@@ -233,6 +247,7 @@ namespace MusicBeePlugin
             _sweepLyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
             _sweepLyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
             _sweepLyricsViewControl.SetInActiveColor(fgColor);
+            _sweepLyricsViewControl.SetSweepAnimationEnabled(_enableSweepAnimation);
             _sweepLyricsViewControl.SetLyrics(_currentLyrics);
             panel.Controls.Add(_sweepLyricsViewControl);
 
@@ -453,6 +468,7 @@ namespace MusicBeePlugin
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
             _useCustomColor = Settings.Value<bool?>("UseCustomColor") ?? false;
+            _enableSweepAnimation = Settings.Value<bool?>("EnableSweepAnimation") ?? true;
 
             string savedAlignment = Settings.Value<string>("LyricsAlignment");
             if (Enum.TryParse(savedAlignment, true, out StringAlignment alignment) &&
