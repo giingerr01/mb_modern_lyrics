@@ -89,11 +89,11 @@
             // 
             this.CheckAnimBox.AutoSize = true;
             this.CheckAnimBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CheckAnimBox.Location = new System.Drawing.Point(82, 67);
+            this.CheckAnimBox.Location = new System.Drawing.Point(82, 74);
             this.CheckAnimBox.Name = "CheckAnimBox";
-            this.CheckAnimBox.Size = new System.Drawing.Size(167, 17);
+            this.CheckAnimBox.Size = new System.Drawing.Size(153, 17);
             this.CheckAnimBox.TabIndex = 5;
-            this.CheckAnimBox.Text = "enable pseudo animation";
+            this.CheckAnimBox.Text = "Enable sweep animation";
             this.CheckAnimBox.UseVisualStyleBackColor = true;
             this.CheckAnimBox.CheckedChanged += new System.EventHandler(this.CheckAnimBox_CheckedChanged);
             // 
@@ -109,7 +109,7 @@
             this.Controls.Add(this.fontSizeBox);
             this.Controls.Add(this.LyricsLabel);
             this.Name = "LRCSettings";
-            this.Size = new System.Drawing.Size(553, 121);
+            this.Size = new System.Drawing.Size(553, 100);
             this.Load += new System.EventHandler(this.LRCSettings_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
