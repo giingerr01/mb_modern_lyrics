@@ -120,16 +120,20 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private void FontSelctor_Click(object sender, EventArgs e)
         {
             using (FontDialog fontDialog = new FontDialog())
+            using (Font currentFont = new Font(_font, _fontSize, _fontStyle))
             {
-                fontDialog.Font = new Font(_font, _fontSize);
+                fontDialog.Font = currentFont;
 
                 if (fontDialog.ShowDialog() == DialogResult.OK)
                 {
-                    _font = fontDialog.Font.Name;
-                    _fontSize = (int)fontDialog.Font.Size;
-                    _fontStyle = fontDialog.Font.Style;
+                    using (Font selectedFont = fontDialog.Font)
+                    {
+                        _font = selectedFont.Name;
+                        _fontSize = (int)selectedFont.Size;
+                        _fontStyle = selectedFont.Style;
+                    }
 
-                    fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+                    PreviewFontStyle();
                     FontSelectionChanged?.Invoke(_font, _fontSize, _fontStyle);
                 }
             }
