@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,7 +26,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         public event Action<string, int, FontStyle> FontSelectionChanged;
         public event Action<Color, bool> ActiveColorChanged;
         public event Action<StringAlignment> LyricsAlignmentChanged;
-        public event Action<bool> SweepAnimationChanged;
+        public event Action<bool> AnimationEnabledChanged;
 
 
         public LRCSettings(
@@ -37,7 +37,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
             Color activeColor,
             bool useCustomColor,
             StringAlignment lyricsAlignment,
-            bool enableSweepAnimation
+            bool animationEnabled
             )
         {
             InitializeComponent();
@@ -52,14 +52,14 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _fontSize = fontSize;
             _fontStyle = fontStyle;
             _activeColor = activeColor;
-            UpdateFontSummary();
+            fontSizeBox.Text = $"{_font}, {_fontSize}pt";
 
             alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
             CustomColorCheckBox.Checked = useCustomColor;
-            CheckAnimBox.Checked = enableSweepAnimation;
             CustomColorCheckBox.ForeColor = useCustomColor
                 ? activeColor
                 : _defaultCheckBoxForeColor;
+            CheckAnimBox.Checked = animationEnabled;
             _initializing = false;
         }
 
@@ -114,7 +114,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         {
             using (FontDialog fontDialog = new FontDialog())
             {
-                fontDialog.Font = new Font(_font, _fontSize, _fontStyle);
+                fontDialog.Font = new Font(_font, _fontSize);
 
                 if (fontDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -122,16 +122,11 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     _fontSize = (int)fontDialog.Font.Size;
                     _fontStyle = fontDialog.Font.Style;
 
-                    UpdateFontSummary();
+                    fontSizeBox.Text = $"{_font}, {_fontSize}pt";
                     FontSelectionChanged?.Invoke(_font, _fontSize, _fontStyle);
                 }
             }
 
-        }
-
-        private void UpdateFontSummary()
-        {
-            fontSizeBox.Text = $"{_font}, {_fontSize}pt, {_fontStyle}";
         }
 
         private void FontSizeBox_TextChanged(object sender, EventArgs e)
@@ -183,7 +178,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 return;
             }
 
-            SweepAnimationChanged?.Invoke(CheckAnimBox.Checked);
+            AnimationEnabledChanged?.Invoke(CheckAnimBox.Checked);
         }
     }
 }
