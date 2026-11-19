@@ -174,7 +174,9 @@ namespace MusicBeePlugin
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit; // avoid Antialias bcz it can render text not very clean sharp
+            // g.SmoothingMode = SmoothingMode.AntiAlias; //its been fucking annoying to select which one to use for rendering!!🤡
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
             // g.SmoothingMode = SmoothingMode.AntiAlias; // for shapes..i dont know, will remove at some point, we are not going to add any shape in lyrics panel
             // using TextRenderingHint as bcz comparing the Builtin lyrics panel and This pluigin they look same so yeahh.
