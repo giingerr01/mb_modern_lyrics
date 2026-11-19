@@ -27,7 +27,7 @@ namespace MusicBeePlugin
         private System.Timers.Timer _positionTimer;
         private PluginInfo about = new PluginInfo();
         private MusicBeeApiInterface mbApiInterface;
-        private LyricsViewControl _lyricsViewControl;
+        private SweepLyricsViewControl _sweepLyricsViewControl;
         private FontStyle _fontStyle = FontStyle.Regular;
         private JObject Settings { get; set; } = new JObject();
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
@@ -159,7 +159,7 @@ namespace MusicBeePlugin
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _lyricsViewControl?.SetFontSize(_fontSize, _font, _fontStyle);
+                    _sweepLyricsViewControl?.SetFontSize(_fontSize, _font, _fontStyle);
                 });
             };
 
@@ -171,7 +171,7 @@ namespace MusicBeePlugin
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _lyricsViewControl?.SetActiveColor(
+                    _sweepLyricsViewControl?.SetActiveColor(
                         _useCustomColor ? _activeColor : Color.Black);
                 });
             };
@@ -183,7 +183,7 @@ namespace MusicBeePlugin
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _lyricsViewControl?.SetLyricsAlignment(_lyricsAlignment);
+                    _sweepLyricsViewControl?.SetLyricsAlignment(_lyricsAlignment);
                 });
             };
 
@@ -221,29 +221,20 @@ namespace MusicBeePlugin
                 _positionTimer.AutoReset = true;
                 _positionTimer.Elapsed += PositionTimer_Elapsed;
             }
-            _lyricsViewControl?.Dispose();
-
-            _lyricsViewControl = new LyricsViewControl { Dock = DockStyle.Fill };
+            _sweepLyricsViewControl?.Dispose();
+            _sweepLyricsViewControl = new SweepLyricsViewControl { Dock = DockStyle.Fill };
 
             Color bgColor = GetSkinPanelBackgroundColor();
 
             Color fgColor = GetSkinForeColor();
 
-
-            // _lyricsViewControl.SetBackgroundColor(bgColor);
-            _lyricsViewControl.BackColor = bgColor;
-
-            _lyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
-
-            _lyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
-
-            _lyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
-
-            _lyricsViewControl.SetInActiveColor(fgColor);
-
-            _lyricsViewControl.SetLyrics(_currentLyrics);
-
-            panel.Controls.Add(_lyricsViewControl);
+            _sweepLyricsViewControl.BackColor = bgColor;
+            _sweepLyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
+            _sweepLyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
+            _sweepLyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
+            _sweepLyricsViewControl.SetInActiveColor(fgColor);
+            _sweepLyricsViewControl.SetLyrics(_currentLyrics);
+            panel.Controls.Add(_sweepLyricsViewControl);
 
             //makeing  sure that the lyrics are loaded even if plugin startup fired bfore panel creating
             if (_currentLyrics == null || _currentLyrics.Lines.Count == 0)
@@ -252,7 +243,7 @@ namespace MusicBeePlugin
             }
             else
             {
-                _lyricsViewControl?.SetLyrics(_currentLyrics);
+                _sweepLyricsViewControl?.SetLyrics(_currentLyrics);
             }
 
             UpdateTimerState();
@@ -329,13 +320,12 @@ namespace MusicBeePlugin
             }
 
             _currentLyrics = LrcParser.Parse(rawLyrics);
-            if (_lyricsViewControl != null && !_lyricsViewControl.IsDisposed)
+            if (_sweepLyricsViewControl != null && !_sweepLyricsViewControl.IsDisposed)
             {
-                _lyricsViewControl.SetLyrics(_currentLyrics);
+                _sweepLyricsViewControl.SetLyrics(_currentLyrics);
                 SyncPosition();
                 return;
             }
-            // _lyricsViewControl?.SetLyrics(_currentLyrics);
         }
 
         // song.flac -> song.lrc  get the file path of the song from api and change the songs title's extension to to .lrc that is next to it next to it
@@ -379,18 +369,18 @@ namespace MusicBeePlugin
 
         private void SyncPosition()
         {
-            if (_lyricsViewControl == null)
+            if (_sweepLyricsViewControl == null || _sweepLyricsViewControl.IsDisposed)
             {
                 return;
             }
             int positionMs = mbApiInterface.Player_GetPosition();
-            _lyricsViewControl.UpdatePosition(TimeSpan.FromMilliseconds(positionMs));
+            _sweepLyricsViewControl.UpdatePosition(TimeSpan.FromMilliseconds(positionMs));
         }
 
         private void PositionTimer_Elapsed(object sender, EventArgs e)
         {
             // System.Diagnostics.Debug.WriteLine("<PositionTimer_Elapsed()>: thread " + System.Threading.Thread.CurrentThread.ManagedThreadId);
-            var uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
+            var uiControl = _dockablePanel ?? (Control)_sweepLyricsViewControl;
             if (uiControl == null || uiControl.IsDisposed || !uiControl.IsHandleCreated)
             {
                 return;
@@ -411,12 +401,13 @@ namespace MusicBeePlugin
                 _positionTimer.Stop();
                 _positionTimer.Dispose();
             }
-            _lyricsViewControl?.Dispose();
+            _sweepLyricsViewControl?.Dispose();
+            _sweepLyricsViewControl = null;
         }
 
         private void RunOnUiThreadYouMf(Action action)
         {
-            Control uiControl = _dockablePanel ?? (Control)_lyricsViewControl;
+            Control uiControl = _dockablePanel ?? (Control)_sweepLyricsViewControl;
             if (uiControl != null && uiControl.InvokeRequired)
             {
                 uiControl.BeginInvoke(action);
@@ -432,8 +423,8 @@ namespace MusicBeePlugin
         {
             RunOnUiThreadYouMf(() =>
             {
-                _lyricsViewControl?.Invalidate();
-                _lyricsViewControl?.Refresh();
+                _sweepLyricsViewControl?.Invalidate();
+                _sweepLyricsViewControl?.Refresh();
 
                 LoadCurrentTrackLyrics();
                 SyncPosition();
