@@ -25,7 +25,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private float[] _heights = new float[0];
         private bool _layoutDirty = true;
         private float _scrollY;
-        private bool _sweepAnimationEnabled = true;
+        private bool _animationEnabled = true;
         private string _font = "Comic Sans";
         private int _fontSize = 12;
         private FontStyle _fontStyle = FontStyle.Bold;
@@ -37,7 +37,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private SolidBrush _activeBrush = new SolidBrush(Color.DodgerBlue);
         private SolidBrush _inactiveBrush = new SolidBrush(Color.DimGray);
-        private static readonly float[] DimAmounts = { 0.70f, 0.65f, 0.50f, 0.35f, 0.20f, 0.15f, 0.10f };
+        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
         private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
 
         private StringFormat _lineFormat = new StringFormat
@@ -110,23 +110,23 @@ namespace MusicBeePlugin.Enhanced_lyrics
             Invalidate();
         }
 
+        public void SetAnimationEnabled(bool enabled)
+        {
+            if (_animationEnabled == enabled)
+            {
+                return;
+            }
+
+            _animationEnabled = enabled;
+            Invalidate();
+        }
+
         public void SetLyrics(ParsedLyrics lyrics)
         {
             _lyrics = lyrics ?? new ParsedLyrics();
             _currentIndex = -1;
             _scrollY = 0;
             _layoutDirty = true;
-            Invalidate();
-        }
-
-        public void SetSweepAnimationEnabled(bool enabled)
-        {
-            if (_sweepAnimationEnabled == enabled)
-            {
-                return;
-            }
-
-            _sweepAnimationEnabled = enabled;
             Invalidate();
         }
 
@@ -145,14 +145,12 @@ namespace MusicBeePlugin.Enhanced_lyrics
             {
                 _currentIndex = newIndex;
                 _layoutDirty = true; //recalculate fo rlayotu scroll
+                Invalidate();
             }
-            else if (!_sweepAnimationEnabled)
+            else if (_animationEnabled)
             {
-                return;
+                Invalidate();
             }
-            // Repaint during playback so the sweep advances smoothly.
-            Invalidate();
-
         }
 
         protected override void OnResize(EventArgs e)
@@ -186,7 +184,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             g.Clear(BackColor);
 
             if (_layoutDirty)
@@ -224,14 +222,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 bool isActive = _lyrics.IsSynchronized && i == _currentIndex;
                 if (isActive)
                 {
-                    if (_sweepAnimationEnabled)
-                    {
-                        DrawSweepingLine(g, text, rect, i);
-                    }
-                    else
-                    {
-                        g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
-                    }
+                    DrawSweepingLine(g, text, rect, i);
                 }
                 else if (_lyrics.IsSynchronized && _currentIndex >= 0)
                 {
@@ -246,6 +237,12 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private void DrawSweepingLine(Graphics g, string text, RectangleF rect, int lineIndex)
         {
+            if (!_animationEnabled)
+            {
+                g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
+                return;
+            }
+
             var line = _lyrics.Lines[lineIndex];
 
             //finally here calculaitng progress (0 to 1)
@@ -296,10 +293,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
             if (_currentIndex >= 0 && _currentIndex < count)
             {
-                float targetScrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f -
-                    ClientSize.Height / 2f;
-                float maxScrollY = Math.Max(0f, y - LineGap - ClientSize.Height);
-                _scrollY = Math.Max(0f, Math.Min(targetScrollY, maxScrollY));
+                _scrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f;
             }
         }
 
