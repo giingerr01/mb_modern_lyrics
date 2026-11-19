@@ -2,6 +2,8 @@
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+using MusicBeePlugin.Enhanced_lyrics;
+// LinebyLineLyricsViewControl.cs
 
 namespace MusicBeePlugin
 {

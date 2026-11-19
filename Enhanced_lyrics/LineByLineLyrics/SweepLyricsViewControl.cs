@@ -7,6 +7,7 @@ using System.Numerics;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+//SweeplyricsViewControl.cs
 
 namespace MusicBeePlugin.Enhanced_lyrics
 {
@@ -176,7 +177,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
             if (_lyrics.Lines.Count == 0)
             {
-                g.DrawString("No Lyrics Available", _inactiveFont, _inactiveBrush, ClientRectangle, _lineFormat);
+                g.DrawString("No Lyrics Available", _activeFont, _activeBrush, ClientRectangle, _lineFormat);
                 return;
             }
 
@@ -209,6 +210,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 }
             }
         }
+
         private void DrawSweepingLine(Graphics g, string text, RectangleF rect, int lineIndex)
         {
             var line = _lyrics.Lines[lineIndex];
@@ -232,11 +234,16 @@ namespace MusicBeePlugin.Enhanced_lyrics
             {
                 //mesure the size of the text to decide hwo wide is the seeep should be
 
-                SizeF textSize = g.MeasureString(text, _activeFont, Math.Max(1, (int)Math.Ceiling(rect.Width)), _lineFormat);
+                SizeF textSize = g.MeasureString(text, _activeFont, 10000, StringFormat.GenericTypographic);
 
                 float widthOfSweep = textSize.Width * progress;
 
                 float startX = rect.X + (rect.Width - textSize.Width) / 2f;
+
+                if (startX < rect.X)
+                {
+                    startX = rect.X;
+                }
 
                 //width of the sweep mask
                 RectangleF sweepRect = new RectangleF(startX, rect.Y, widthOfSweep, rect.Height);
