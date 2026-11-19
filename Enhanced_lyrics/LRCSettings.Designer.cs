@@ -40,7 +40,8 @@
             // 
             this.LyricsLabel.AutoSize = true;
             this.LyricsLabel.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.LyricsLabel.Location = new System.Drawing.Point(-3, 0);
+            this.LyricsLabel.Location = new System.Drawing.Point(-2, 0);
+            this.LyricsLabel.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.LyricsLabel.Name = "LyricsLabel";
             this.LyricsLabel.Size = new System.Drawing.Size(81, 17);
             this.LyricsLabel.TabIndex = 0;
@@ -51,7 +52,8 @@
             // 
             this.fontSizeBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fontSizeBox.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.fontSizeBox.Location = new System.Drawing.Point(82, 27);
+            this.fontSizeBox.Location = new System.Drawing.Point(82, 28);
+            this.fontSizeBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.fontSizeBox.Name = "fontSizeBox";
             this.fontSizeBox.ReadOnly = true;
             this.fontSizeBox.Size = new System.Drawing.Size(178, 20);
@@ -61,10 +63,11 @@
             // CustomColorCheckBox
             // 
             this.CustomColorCheckBox.AutoSize = true;
-            this.CustomColorCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CustomColorCheckBox.Location = new System.Drawing.Point(82, 53);
+            this.CustomColorCheckBox.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CustomColorCheckBox.Location = new System.Drawing.Point(82, 51);
+            this.CustomColorCheckBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.CustomColorCheckBox.Name = "CustomColorCheckBox";
-            this.CustomColorCheckBox.Size = new System.Drawing.Size(176, 17);
+            this.CustomColorCheckBox.Size = new System.Drawing.Size(171, 20);
             this.CustomColorCheckBox.TabIndex = 3;
             this.CustomColorCheckBox.Text = "color for highlighted Lyrics";
             this.CustomColorCheckBox.UseVisualStyleBackColor = true;
@@ -74,24 +77,27 @@
             // 
             this.alignmentComboBox.BackColor = System.Drawing.SystemColors.Control;
             this.alignmentComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.alignmentComboBox.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.alignmentComboBox.FormattingEnabled = true;
             this.alignmentComboBox.Items.AddRange(new object[] {
             "Default Text Alignment",
             "Left Text Alignment",
             "Right Text Alignment"});
             this.alignmentComboBox.Location = new System.Drawing.Point(82, 3);
+            this.alignmentComboBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.alignmentComboBox.Name = "alignmentComboBox";
-            this.alignmentComboBox.Size = new System.Drawing.Size(178, 21);
+            this.alignmentComboBox.Size = new System.Drawing.Size(178, 24);
             this.alignmentComboBox.TabIndex = 4;
             this.alignmentComboBox.SelectedIndexChanged += new System.EventHandler(this.AlignmentComboBox_SelectedIndexChanged);
             // 
             // CheckAnimBox
             // 
             this.CheckAnimBox.AutoSize = true;
-            this.CheckAnimBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CheckAnimBox.Location = new System.Drawing.Point(82, 74);
+            this.CheckAnimBox.Font = new System.Drawing.Font("Comic Sans MS", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CheckAnimBox.Location = new System.Drawing.Point(82, 67);
+            this.CheckAnimBox.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.CheckAnimBox.Name = "CheckAnimBox";
-            this.CheckAnimBox.Size = new System.Drawing.Size(153, 17);
+            this.CheckAnimBox.Size = new System.Drawing.Size(152, 20);
             this.CheckAnimBox.TabIndex = 5;
             this.CheckAnimBox.Text = "Enable sweep animation";
             this.CheckAnimBox.UseVisualStyleBackColor = true;
@@ -108,6 +114,7 @@
             this.Controls.Add(this.CustomColorCheckBox);
             this.Controls.Add(this.fontSizeBox);
             this.Controls.Add(this.LyricsLabel);
+            this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.Name = "LRCSettings";
             this.Size = new System.Drawing.Size(553, 100);
             this.Load += new System.EventHandler(this.LRCSettings_Load);
