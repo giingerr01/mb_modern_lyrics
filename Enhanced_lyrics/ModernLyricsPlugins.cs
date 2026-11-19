@@ -1,4 +1,4 @@
-﻿//ModernLyricsPlugin.cs
+//ModernLyricsPlugin.cs
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -22,6 +22,7 @@ namespace MusicBeePlugin
         private string _font = "Lucida Sans";
         private Color _bgColor = Color.White;
         private bool _useCustomColor = false;
+        private bool _animationEnabled = true;
         private Color _activeColor = Color.Black;
         private Color _inactiveColor = Color.Gray;
         private System.Timers.Timer _positionTimer;
@@ -29,7 +30,6 @@ namespace MusicBeePlugin
         private MusicBeeApiInterface mbApiInterface;
         private SweepLyricsViewControl _sweepLyricsViewControl;
         private FontStyle _fontStyle = FontStyle.Regular;
-        private bool _enableSweepAnimation = true;
         private JObject Settings { get; set; } = new JObject();
         private ParsedLyrics _currentLyrics = new ParsedLyrics();
         private StringAlignment _lyricsAlignment = StringAlignment.Center;
@@ -79,7 +79,7 @@ namespace MusicBeePlugin
             about.MinInterfaceVersion = MinInterfaceVersion;
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
-            about.ConfigurationPanelHeight = 120;
+            about.ConfigurationPanelHeight = 100;
             return about;
         }
 
@@ -115,7 +115,7 @@ namespace MusicBeePlugin
             lyricsSettings["FontStyle"] = _fontStyle.ToString();
             lyricsSettings["UseCustomColor"] = _useCustomColor;
             lyricsSettings["LyricsAlignment"] = _lyricsAlignment.ToString();
-            lyricsSettings["EnableSweepAnimation"] = _enableSweepAnimation;
+            lyricsSettings["AnimationEnabled"] = _animationEnabled;
 
             //attach the root
             settingsJson["Lyrics-Settings"] = lyricsSettings;
@@ -142,8 +142,7 @@ namespace MusicBeePlugin
 
             _bgColor = GetSkinPanelBackgroundColor();
             lrcSettings = new LRCSettings(
-                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor,
-                _lyricsAlignment, _enableSweepAnimation)
+                _font, _fontSize, _bgColor, _fontStyle, _activeColor, _useCustomColor, _lyricsAlignment, _animationEnabled)
             {
                 Dock = DockStyle.Fill
             };
@@ -190,14 +189,14 @@ namespace MusicBeePlugin
                 });
             };
 
-            lrcSettings.SweepAnimationChanged += enabled =>
+            lrcSettings.AnimationEnabledChanged += enabled =>
             {
-                _enableSweepAnimation = enabled;
+                _animationEnabled = enabled;
                 SaveSettings();
 
                 RunOnUiThreadYouMf(() =>
                 {
-                    _sweepLyricsViewControl?.SetSweepAnimationEnabled(_enableSweepAnimation);
+                    _sweepLyricsViewControl?.SetAnimationEnabled(_animationEnabled);
                 });
             };
 
@@ -245,9 +244,9 @@ namespace MusicBeePlugin
             _sweepLyricsViewControl.BackColor = bgColor;
             _sweepLyricsViewControl.SetFontSize(_fontSize, _font, _fontStyle);
             _sweepLyricsViewControl.SetLyricsAlignment(_lyricsAlignment);
+            _sweepLyricsViewControl.SetAnimationEnabled(_animationEnabled);
             _sweepLyricsViewControl.SetActiveColor(_useCustomColor ? _activeColor : Color.Black);
             _sweepLyricsViewControl.SetInActiveColor(fgColor);
-            _sweepLyricsViewControl.SetSweepAnimationEnabled(_enableSweepAnimation);
             _sweepLyricsViewControl.SetLyrics(_currentLyrics);
             panel.Controls.Add(_sweepLyricsViewControl);
 
@@ -468,7 +467,7 @@ namespace MusicBeePlugin
             _fontSize = Settings.Value<int?>("FontSize") ?? 10;
             _font = Settings.Value<string>("Font") ?? "Lucida sans";
             _useCustomColor = Settings.Value<bool?>("UseCustomColor") ?? false;
-            _enableSweepAnimation = Settings.Value<bool?>("EnableSweepAnimation") ?? true;
+            _animationEnabled = Settings.Value<bool?>("AnimationEnabled") ?? true;
 
             string savedAlignment = Settings.Value<string>("LyricsAlignment");
             if (Enum.TryParse(savedAlignment, true, out StringAlignment alignment) &&
