@@ -89,7 +89,7 @@
             // 
             this.CheckAnimBox.AutoSize = true;
             this.CheckAnimBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CheckAnimBox.Location = new System.Drawing.Point(82, 76);
+            this.CheckAnimBox.Location = new System.Drawing.Point(82, 67);
             this.CheckAnimBox.Name = "CheckAnimBox";
             this.CheckAnimBox.Size = new System.Drawing.Size(167, 17);
             this.CheckAnimBox.TabIndex = 5;
