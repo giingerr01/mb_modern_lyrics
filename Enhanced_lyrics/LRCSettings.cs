@@ -52,7 +52,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _fontSize = fontSize;
             _fontStyle = fontStyle;
             _activeColor = activeColor;
-            fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+
+            PreviewFontStyle();
 
             alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
             CustomColorCheckBox.Checked = useCustomColor;
@@ -61,6 +62,12 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 : _defaultCheckBoxForeColor;
             CheckAnimBox.Checked = animationEnabled;
             _initializing = false;
+        }
+
+        private void PreviewFontStyle()
+        {
+            fontSizeBox.Text = $"{_font}, {_fontStyle}, {_fontSize}pt";
+
         }
 
         private static int GetAlignmentIndex(StringAlignment alignment)
