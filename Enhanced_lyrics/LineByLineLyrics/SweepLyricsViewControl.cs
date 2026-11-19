@@ -170,7 +170,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             g.Clear(BackColor);
 
             if (_layoutDirty)
@@ -273,7 +273,10 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
             if (_currentIndex >= 0 && _currentIndex < count)
             {
-                _scrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f;
+                float targetScrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f -
+                    ClientSize.Height / 2f;
+                float maxScrollY = Math.Max(0f, y - LineGap - ClientSize.Height);
+                _scrollY = Math.Max(0f, Math.Min(targetScrollY, maxScrollY));
             }
         }
 
