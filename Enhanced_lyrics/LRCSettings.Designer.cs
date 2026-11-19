@@ -33,6 +33,7 @@
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
             this.CustomColorCheckBox = new System.Windows.Forms.CheckBox();
             this.alignmentComboBox = new System.Windows.Forms.ComboBox();
+            this.CheckAnimBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // LyricsLabel
@@ -60,10 +61,10 @@
             // CustomColorCheckBox
             // 
             this.CustomColorCheckBox.AutoSize = true;
-            this.CustomColorCheckBox.Font = new System.Drawing.Font("JetBrainsMono NFM", 8.249999F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CustomColorCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CustomColorCheckBox.Location = new System.Drawing.Point(82, 53);
             this.CustomColorCheckBox.Name = "CustomColorCheckBox";
-            this.CustomColorCheckBox.Size = new System.Drawing.Size(222, 18);
+            this.CustomColorCheckBox.Size = new System.Drawing.Size(176, 17);
             this.CustomColorCheckBox.TabIndex = 3;
             this.CustomColorCheckBox.Text = "color for highlighted Lyrics";
             this.CustomColorCheckBox.UseVisualStyleBackColor = true;
@@ -84,12 +85,25 @@
             this.alignmentComboBox.TabIndex = 4;
             this.alignmentComboBox.SelectedIndexChanged += new System.EventHandler(this.AlignmentComboBox_SelectedIndexChanged);
             // 
+            // CheckAnimBox
+            // 
+            this.CheckAnimBox.AutoSize = true;
+            this.CheckAnimBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CheckAnimBox.Location = new System.Drawing.Point(82, 76);
+            this.CheckAnimBox.Name = "CheckAnimBox";
+            this.CheckAnimBox.Size = new System.Drawing.Size(167, 17);
+            this.CheckAnimBox.TabIndex = 5;
+            this.CheckAnimBox.Text = "enable pseudo animation";
+            this.CheckAnimBox.UseVisualStyleBackColor = true;
+            this.CheckAnimBox.CheckedChanged += new System.EventHandler(this.CheckAnimBox_CheckedChanged);
+            // 
             // LRCSettings
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.SystemColors.Control;
+            this.Controls.Add(this.CheckAnimBox);
             this.Controls.Add(this.alignmentComboBox);
             this.Controls.Add(this.CustomColorCheckBox);
             this.Controls.Add(this.fontSizeBox);
@@ -109,5 +123,6 @@
         private System.Windows.Forms.FontDialog fontDialog1;
         private System.Windows.Forms.CheckBox CustomColorCheckBox;
         private System.Windows.Forms.ComboBox alignmentComboBox;
+        private System.Windows.Forms.CheckBox CheckAnimBox;
     }
 }
