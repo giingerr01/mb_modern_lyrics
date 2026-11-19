@@ -293,7 +293,9 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
             if (_currentIndex >= 0 && _currentIndex < count)
             {
-                _scrollY = _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f;
+                _scrollY = Math.Max(
+                    0,
+                    _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f);
             }
         }
 
