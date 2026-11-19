@@ -25,6 +25,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         private float[] _heights = new float[0];
         private bool _layoutDirty = true;
         private float _scrollY;
+        private bool _sweepAnimationEnabled = true;
         private string _font = "Comic Sans";
         private int _fontSize = 12;
         private FontStyle _fontStyle = FontStyle.Bold;
@@ -118,6 +119,17 @@ namespace MusicBeePlugin.Enhanced_lyrics
             Invalidate();
         }
 
+        public void SetSweepAnimationEnabled(bool enabled)
+        {
+            if (_sweepAnimationEnabled == enabled)
+            {
+                return;
+            }
+
+            _sweepAnimationEnabled = enabled;
+            Invalidate();
+        }
+
         public void UpdatePosition(TimeSpan position)
         {
             _currentPosition = position;
@@ -134,7 +146,11 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 _currentIndex = newIndex;
                 _layoutDirty = true; //recalculate fo rlayotu scroll
             }
-            //Note i have to invalidaat every frame to make sweepanimation
+            else if (!_sweepAnimationEnabled)
+            {
+                return;
+            }
+            // Repaint during playback so the sweep advances smoothly.
             Invalidate();
 
         }
@@ -208,7 +224,14 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 bool isActive = _lyrics.IsSynchronized && i == _currentIndex;
                 if (isActive)
                 {
-                    DrawSweepingLine(g, text, rect, i);
+                    if (_sweepAnimationEnabled)
+                    {
+                        DrawSweepingLine(g, text, rect, i);
+                    }
+                    else
+                    {
+                        g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
+                    }
                 }
                 else if (_lyrics.IsSynchronized && _currentIndex >= 0)
                 {
