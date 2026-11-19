@@ -186,7 +186,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
             g.Clear(BackColor);
 
             if (_layoutDirty)
