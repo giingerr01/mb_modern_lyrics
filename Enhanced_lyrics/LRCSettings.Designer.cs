@@ -41,9 +41,9 @@
             this.LyricsLabel.Font = new System.Drawing.Font("Segoe UI Semibold", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LyricsLabel.Location = new System.Drawing.Point(-3, 0);
             this.LyricsLabel.Name = "LyricsLabel";
-            this.LyricsLabel.Size = new System.Drawing.Size(74, 17);
+            this.LyricsLabel.Size = new System.Drawing.Size(81, 17);
             this.LyricsLabel.TabIndex = 0;
-            this.LyricsLabel.Text = "LRC Lyrics :";
+            this.LyricsLabel.Text = "ELRC Lyrics :";
             this.LyricsLabel.Click += new System.EventHandler(this.LyricsLabel_Click);
             // 
             // fontSizeBox
