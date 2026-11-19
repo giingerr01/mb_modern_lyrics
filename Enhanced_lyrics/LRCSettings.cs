@@ -50,7 +50,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _fontSize = fontSize;
             _fontStyle = fontStyle;
             _activeColor = activeColor;
-            fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+            UpdateFontSummary();
 
             alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
             CustomColorCheckBox.Checked = useCustomColor;
@@ -111,7 +111,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         {
             using (FontDialog fontDialog = new FontDialog())
             {
-                fontDialog.Font = new Font(_font, _fontSize);
+                fontDialog.Font = new Font(_font, _fontSize, _fontStyle);
 
                 if (fontDialog.ShowDialog() == DialogResult.OK)
                 {
@@ -119,11 +119,16 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     _fontSize = (int)fontDialog.Font.Size;
                     _fontStyle = fontDialog.Font.Style;
 
-                    fontSizeBox.Text = $"{_font}, {_fontSize}pt";
+                    UpdateFontSummary();
                     FontSelectionChanged?.Invoke(_font, _fontSize, _fontStyle);
                 }
             }
 
+        }
+
+        private void UpdateFontSummary()
+        {
+            fontSizeBox.Text = $"{_font}, {_fontSize}pt, {_fontStyle}";
         }
 
         private void FontSizeBox_TextChanged(object sender, EventArgs e)
