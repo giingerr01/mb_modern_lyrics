@@ -37,7 +37,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private SolidBrush _activeBrush = new SolidBrush(Color.DodgerBlue);
         private SolidBrush _inactiveBrush = new SolidBrush(Color.DimGray);
-        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
+        // private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
+        private static readonly float[] DimAmounts = { 0.50f, 0.25f, 0.15f };
         private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
 
         private StringFormat _lineFormat = new StringFormat
