@@ -26,6 +26,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         public event Action<string, int, FontStyle> FontSelectionChanged;
         public event Action<Color, bool> ActiveColorChanged;
         public event Action<StringAlignment> LyricsAlignmentChanged;
+        public event Action<bool> SweepAnimationChanged;
 
 
         public LRCSettings(
@@ -35,7 +36,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
             FontStyle fontStyle,
             Color activeColor,
             bool useCustomColor,
-            StringAlignment lyricsAlignment
+            StringAlignment lyricsAlignment,
+            bool enableSweepAnimation
             )
         {
             InitializeComponent();
@@ -54,6 +56,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
             alignmentComboBox.SelectedIndex = GetAlignmentIndex(lyricsAlignment);
             CustomColorCheckBox.Checked = useCustomColor;
+            CheckAnimBox.Checked = enableSweepAnimation;
             CustomColorCheckBox.ForeColor = useCustomColor
                 ? activeColor
                 : _defaultCheckBoxForeColor;
@@ -171,6 +174,16 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 ActiveColorChanged?.Invoke(_activeColor, false);
             }
 
+        }
+
+        private void CheckAnimBox_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_initializing)
+            {
+                return;
+            }
+
+            SweepAnimationChanged?.Invoke(CheckAnimBox.Checked);
         }
     }
 }
