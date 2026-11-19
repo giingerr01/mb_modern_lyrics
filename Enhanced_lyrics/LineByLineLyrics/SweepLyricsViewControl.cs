@@ -36,6 +36,8 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private SolidBrush _activeBrush = new SolidBrush(Color.DodgerBlue);
         private SolidBrush _inactiveBrush = new SolidBrush(Color.DimGray);
+        private static readonly float[] DimAmounts = { 0.90f, 0.75f, 0.60f, 0.45f, 0.30f, 0.15f, 0.10f };
+        private readonly SolidBrush[] _dimBrushes = new SolidBrush[DimAmounts.Length];
 
         private StringFormat _lineFormat = new StringFormat
         {
@@ -67,8 +69,10 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _inactiveColor = color;
             _inactiveBrush.Dispose();
             _inactiveBrush = new SolidBrush(_inactiveColor);
+            RebuildDimBrushes();
             Invalidate();
         }
+
 
         public void SetFontSize(int fontSize, string font, FontStyle fontStyle)
         {
@@ -166,7 +170,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
         protected override void OnPaint(PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
             g.Clear(BackColor);
 
             if (_layoutDirty)
@@ -199,10 +203,16 @@ namespace MusicBeePlugin.Enhanced_lyrics
                     continue;
                 }
 
+                int distance = Math.Abs(i - _currentIndex);
+                int brushIndex = Math.Max(0, Math.Min(distance - 1, _dimBrushes.Length - 1));
                 bool isActive = _lyrics.IsSynchronized && i == _currentIndex;
                 if (isActive)
                 {
                     DrawSweepingLine(g, text, rect, i);
+                }
+                else if (_lyrics.IsSynchronized && _currentIndex >= 0)
+                {
+                    g.DrawString(text, _inactiveFont, _dimBrushes[brushIndex], rect, _lineFormat);
                 }
                 else
                 {
@@ -229,26 +239,15 @@ namespace MusicBeePlugin.Enhanced_lyrics
             //clamping between 0 to 1
             progress = Math.Max(0f, Math.Min(1f, progress));
 
-            g.DrawString(text, _inactiveFont, _inactiveBrush, rect, _lineFormat);
+            g.DrawString(text, _activeFont, _inactiveBrush, rect, _lineFormat);
             if (progress > 0f)
             {
-                //mesure the size of the text to decide hwo wide is the seeep should be
-
-                SizeF textSize = g.MeasureString(text, _activeFont, 10000, StringFormat.GenericTypographic);
-
-                float widthOfSweep = textSize.Width * progress;
-
-                float startX = rect.X + (rect.Width - textSize.Width) / 2f;
-
-                if (startX < rect.X)
-                {
-                    startX = rect.X;
-                }
-
-                //width of the sweep mask
-                RectangleF sweepRect = new RectangleF(startX, rect.Y, widthOfSweep, rect.Height);
-
-                //here saving the state and apply and restroe
+                //saving the state and apply the and restore
+                RectangleF sweepRect = new RectangleF(
+                    rect.X,
+                    rect.Y,
+                    rect.Width * progress,
+                    rect.Height);
                 GraphicsState state = g.Save();
                 g.SetClip(sweepRect, CombineMode.Intersect);
                 g.DrawString(text, _activeFont, _activeBrush, rect, _lineFormat);
@@ -278,6 +277,35 @@ namespace MusicBeePlugin.Enhanced_lyrics
             }
         }
 
+        private void RebuildDimBrushes()
+        {
+            for (int i = 0; i < DimAmounts.Length; i++)
+            {
+                _dimBrushes[i]?.Dispose();
+                _dimBrushes[i] = new SolidBrush(BlendColors(_inactiveColor, BackColor, DimAmounts[i]));
+            }
+        }
+
+        private static Color BlendColors(Color foreground, Color background, float visibility)
+        {
+            visibility = Math.Max(0f, Math.Min(1f, visibility));
+
+            int r = (int)(background.R + (foreground.R - background.R) * visibility);
+            int g = (int)(background.G + (foreground.G - background.G) * visibility);
+            int b = (int)(background.B + (foreground.B - background.B) * visibility);
+
+            return Color.FromArgb(r, g, b);
+        }
+
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (_inactiveBrush != null)
+            {
+                RebuildDimBrushes();
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -287,6 +315,10 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 _inactiveBrush?.Dispose();
                 _inactiveFont?.Dispose();
                 _lineFormat?.Dispose();
+                foreach (SolidBrush brush in _dimBrushes)
+                {
+                    brush?.Dispose();
+                }
             }
             base.Dispose(disposing);
         }
