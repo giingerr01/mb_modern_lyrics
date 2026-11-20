@@ -15,6 +15,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
     {
         private const int HorizontalPadding = 24;
         private const int LineGap = 1;
+        private const float WheelStep = 30f;
 
         private ParsedLyrics _lyrics = new ParsedLyrics();
         private int _currentIndex = -1;
@@ -23,6 +24,7 @@ namespace MusicBeePlugin.Enhanced_lyrics
 
         private float[] _tops = new float[0];
         private float[] _heights = new float[0];
+        private float _totalHeight;
         private bool _layoutDirty = true;
         private float _scrollY;
         private bool _animationEnabled = true;
@@ -160,6 +162,28 @@ namespace MusicBeePlugin.Enhanced_lyrics
             _layoutDirty = true;
         }
 
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+            if (!_lyrics.IsSynchronized)
+            {
+                Focus();
+            }
+        }
+
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+            if (_lyrics.IsSynchronized)
+            {
+                return;
+            }
+
+            float nextScroll = _scrollY - e.Delta / 120f * WheelStep;
+            _scrollY = _layoutDirty ? Math.Max(0, nextScroll) : ClampScroll(nextScroll);
+            Invalidate();
+        }
+
         private int FindLineIndex(TimeSpan position)
         {
             var lines = _lyrics.Lines;
@@ -294,12 +318,22 @@ namespace MusicBeePlugin.Enhanced_lyrics
                 y += h + LineGap;
             }
 
+            _totalHeight = Math.Max(0, y - LineGap);
             if (_currentIndex >= 0 && _currentIndex < count)
             {
                 _scrollY = Math.Max(
                     0,
                     _tops[_currentIndex] + _heights[_currentIndex] / 2f - ClientSize.Height / 2f);
             }
+            else
+            {
+                _scrollY = ClampScroll(_scrollY);
+            }
+        }
+
+        private float ClampScroll(float value)
+        {
+            return Math.Max(0, Math.Min(Math.Max(0, _totalHeight - ClientSize.Height), value));
         }
 
         private void RebuildDimBrushes()
