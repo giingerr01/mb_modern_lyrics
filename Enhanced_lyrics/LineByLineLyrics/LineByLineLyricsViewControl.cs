@@ -372,7 +372,7 @@ namespace MusicBeePlugin
             base.OnMouseEnter(e);
             if (!_lyrics.IsSynchronized)
             {
-                Focus();   // so the mouse wheel reaches us
+                Focus(); //for mouse wheel
             }
         }
 
