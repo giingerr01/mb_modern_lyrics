@@ -11,10 +11,6 @@ using System.Windows.Forms;
 namespace MusicBeePlugin.Enhanced_lyrics
 {
 
-    // Color backGroundColor = Color.FromArgb(mbApiInterface.Setting_GetSkinElementColour(
-    // SkinElement.SkinInputPanel,
-    //         ElementState.ElementStateDefault,
-    //         ElementComponent.ComponentBackground));
     public partial class LRCSettings : UserControl
     {
         private string _font = "Lucida Sans";
