@@ -2,12 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Text;
-using System.Net.Configuration;
-using System.Numerics;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
-//SweeplyricsViewControl.cs
 
 namespace MusicBeePlugin.Enhanced_lyrics
 {
