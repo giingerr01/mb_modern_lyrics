@@ -99,6 +99,14 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Enhanced_lyrics\LineByLineLyrics\Models\LineByLineLyricsModels.cs" />
+    <Compile Include="Enhanced_lyrics\WordByWordLyrics\WordByWordLyricsParser.cs" />
+    <Compile Include="Enhanced_lyrics\WordByWordLyrics\WordByWordLyricsViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Enhanced_lyrics\WordByWordLyrics\SweepLyricsViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Enhanced_lyrics\WordByWordLyrics\Models\WordByWordLyricsModels.cs" />
     <Compile Include="Enhanced_lyrics\LRCSettings.cs">
       <SubType>UserControl</SubType>
     </Compile>
